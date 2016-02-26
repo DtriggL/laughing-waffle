@@ -29,8 +29,8 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapsSplashActivity"
-            android:label="@string/title_activity_maps_splash">
+            android:name=".explore"
+            android:label="@string/title_activity_explore">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
