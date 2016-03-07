@@ -2,6 +2,8 @@ package us.trigg.crumble;
 
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -10,13 +12,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.HashMap;
+import java.util.Map;
+
+// TODO:
+//  1. Override the MarkerCluster OnInfoWindowListener
 
 public class explore extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private HashMap<Marker, String> markers;
+    private ClusterManager<CrumbClusterItem> mClusterManager;
+    private HashMap<Marker, Crumb> markers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +56,11 @@ public class explore extends FragmentActivity implements OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
         // Add a the markers from the hashmap to the map
+
+        setUpClusterer();
+        // Test Code:
+        // Position the map.
+        getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(5, -5), 10));
     }
 
     /**
@@ -81,6 +94,43 @@ public class explore extends FragmentActivity implements OnMapReadyCallback {
         }
     }
 
+    public GoogleMap getMap() {
+        return mMap;
+    }
+    //-------------------------------------------------------------------------
+    // Private Classes
+    //-------------------------------------------------------------------------
+    private class MyInfoWindow implements GoogleMap.OnInfoWindowClickListener,
+        GoogleMap.InfoWindowAdapter {
+        private View myInfoWindowView;
+
+        public MyInfoWindow() {
+            // Add your custom layout here
+            //myInfoWindowView = getLayoutInflater().inflate(R.layout.my_custom_info_layout, null);
+        }
+
+        @Override
+        public void onInfoWindowClick(Marker marker) {
+            Toast.makeText(getApplicationContext(), "Info window clicked",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public View getInfoContents(Marker marker) {
+            // Set the content of the view, then return the view.
+            // Lookup the crumb in the marker hash table.
+            return null;
+        }
+
+        @Override
+        public View getInfoWindow(Marker marker) {
+            return null;
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    // Private Methods
+    //-------------------------------------------------------------------------
     private void downloadCrumbs() {
         Runnable r = new Runnable() {
             @Override
@@ -91,4 +141,28 @@ public class explore extends FragmentActivity implements OnMapReadyCallback {
         Thread t = new Thread(r);
         t.start();
     }
+
+    private void setUpClusterer() {
+        // Initialize the manager with the context and the map.
+        // (Activity extends context, so we can pass 'this' in the constructor.)
+        mClusterManager = new ClusterManager<CrumbClusterItem>(this, getMap());
+
+        // Point the map's listeners at the listeners implemented by the cluster
+        // manager.
+        getMap().setOnCameraChangeListener(mClusterManager);
+        getMap().setOnMarkerClickListener(mClusterManager);
+
+        // Add cluster items (markers) to the cluster manager.
+        addItems();
+    }
+
+    private void addItems() {
+        // Initial test code: add ten objects to the cluster manager
+        for (int i = 0; i < 10; i++) {
+            double offset = i/60d;
+            mClusterManager.addItem(new CrumbClusterItem(new Crumb(new LatLng(5,-5 + offset))));
+        }
+    }
+
+
 }
