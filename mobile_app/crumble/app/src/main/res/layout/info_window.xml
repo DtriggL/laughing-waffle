@@ -1,39 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_width="@dimen/info_view_height"
+    android:layout_height="@dimen/info_view_width"
+    android:background="@color/white">
 
     <TextView
         android:id="@+id/info_title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:gravity="center"/>
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="30dp">
 
         <ImageView
             android:id="@+id/bites_img"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"/>
+            android:layout_weight="2"
+            android:paddingRight="@dimen/info_view_margin"
+            android:paddingLeft="@dimen/info_view_margin"
+            android:layout_marginLeft="@dimen/info_view_margin"/>
         <TextView
             android:id="@+id/bites_num"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"/>
+            android:layout_weight="3"
+            android:gravity="center"
+            android:paddingRight="@dimen/info_view_margin"/>
+        <View
+            android:layout_height="20dp"
+            android:layout_width="1dp"
+            android:background="@color/gray"
+            android:paddingBottom="@dimen/info_view_margin"
+            android:paddingTop="@dimen/info_view_margin"
+            android:layout_marginTop="@dimen/info_view_margin"
+            />
         <ImageView
             android:id="@+id/rating_img"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"/>
+            android:layout_weight="2"
+            android:paddingRight="@dimen/info_view_margin"
+            android:layout_marginLeft="@dimen/info_view_margin"/>
         <TextView
             android:id="@+id/rating"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"/>
+            android:layout_weight="3"
+            android:gravity="center"
+            android:paddingRight="@dimen/info_view_margin"/>
 
 
     </LinearLayout>

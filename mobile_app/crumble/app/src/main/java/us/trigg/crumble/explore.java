@@ -24,6 +24,7 @@ import org.w3c.dom.Text;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 // TODO:
 //  1. Override the MarkerCluster OnInfoWindowListener
@@ -192,9 +193,12 @@ public class explore extends FragmentActivity implements OnMapReadyCallback {
             // For now, set bites to be 0
             bites.setText("0");
 
+            TextView rating = (TextView) myInfoWindowView.findViewById(R.id.rating);
+            rating.setText("0/5");
+
             // Set the images within the layout
             ImageView star = (ImageView) myInfoWindowView.findViewById(R.id.rating_img);
-            star.setImageResource(R.drawable.star);
+            star.setImageResource(R.drawable.star2);
             ImageView hiker = (ImageView) myInfoWindowView.findViewById(R.id.bites_img);
             hiker.setImageResource(R.drawable.hikingman);
 
@@ -244,10 +248,12 @@ public class explore extends FragmentActivity implements OnMapReadyCallback {
     }
 
     private void addItems() {
-        // Initial test code: add ten objects to the cluster manager
-        for (int i = 0; i < 10; i++) {
-            double offset = i / 60d;
-            mClusterManager.addItem(new CrumbClusterItem(new Crumb(new LatLng(5, -5 + offset))));
+        Random gen = new Random();
+        // Initial test code: add 200 randomly placed objects to the cluster manager
+        for (int i = 0; i < 200; i++) {
+            double lat = gen.nextDouble() * 90;
+            double lon = gen.nextDouble() * 180;
+            mClusterManager.addItem(new CrumbClusterItem(new Crumb(new LatLng(lat, lon))));
         }
     }
 
