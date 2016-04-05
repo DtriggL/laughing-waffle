@@ -95,7 +95,7 @@ $app->post('/api/crumb/add', function () use ($app) {
     return $response;
 });
 
-//—------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 // Function Name: getCrumbContent
 // Description: Get the content of a single Crumb based on a note_id
 // URL: http://uaf132701.ddns.uark.edu/api/crumb/<id:integer>
@@ -201,6 +201,141 @@ $app->post('/api/crumb/edit', function () use ($app) {
 
     return $response;
 });
+
+//-------------------------------------------------------------------------------
+// Function Name: addUser
+// Description: Add a user
+// URL: http://uaf132701.ddns.uark.edu/api/user/add
+// Method: POST
+// Payload: JSON User Object: Required Fields are:
+//    1. user_name
+//    2. first_name
+//    3. last_name
+//    4. email
+//    5. password
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”OK”,
+//         “data”: “{User object}”
+//        }
+//    if not success:
+//        {
+//         “status”:”ERROR”
+//        }
+//-------------------------------------------------------------------------------
+$app->post('/api/user/add', function () use ($app) {
+    // Get the raw JSON content
+    $user = $app->request->getJsonRawBody();
+
+    $phql = "INSERT INTO User (user_name, first_name, last_name, email, password) VALUES (:user_name:, :first_name:, :last_name:, :email:, :password:)";
+    // Get a collection of users that meet the criteria
+    $status = $app->modelsManager->executeQuery($phql, array(
+        'user_name' => $user->user_name,
+        'first_name' => $user->first_name,
+        'last_name' => $user->last_name,
+        'email' => $user->email,
+        'password' => $user->password
+    ));
+
+    // Create a response
+    $response = new Response();
+
+    if ($status->success() == true) {
+        // Change the HTTP status
+        $response->setStatusCode(201, "Created");
+
+        $user->user_id = $status->getModel()->user_id;
+
+        $response->setJsonContent(
+            array(
+                'status' => 'OK',
+                'data'   => $user
+            )
+        );
+
+    } else {
+        // Change the HTTP status
+        $response->setStatusCode(409, "Conflict");
+
+        // Send errors to the client
+        $errors = array();
+        foreach ($status->getMessages() as $message) {
+            $errors[] = $message->getMessage();
+        }
+
+        $response->setJsonContent(
+            array(
+                'status'   => 'ERROR',
+                'messages' => $errors
+            )
+        );
+    }
+
+    return $response;
+});
+
+//-------------------------------------------------------------------------------
+// Function Name: getAllCrumbs
+// Description: Returns all crumbs in the database, but only their basic
+//     information such as, title, bites, rating, etc.
+// URL: http://uaf132701.ddns.uark.edu/api/crumb/all
+// Method: GET
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”FOUND”,
+//         “data[]”: “{crumb objects}”
+//        }
+//    if not success:
+//        {
+//         “status”:”NOT-FOUND”
+//        }
+//
+// Notes
+// -----
+// The crumbs returned are only partial crumbs that do not include user_id or
+// text fields.
+//-------------------------------------------------------------------------------
+$app->get('/api/crumb/all', function () use ($app) {
+	$phql = "SELECT * FROM Crumb";
+
+	//Get the list that matches the given list id
+	$crumbs = $app->modelsManager->executeQuery($phql);
+    
+	//Create a response to send back to the client
+	$response = new Response();
+
+	if($crumbs == false) {
+	    $response->setJsonContent(
+	    array(
+	        'status' => 'NOT-FOUND')
+	    );
+	}
+	else {
+        /* Here is where we would loop through the results and build
+           the JSON objects*/
+        $data = array();
+        foreach ($crumbs as $crumb) {
+               $data[] = array(
+                   'note_id' => $crumb->note_id,
+                   'latitude' => $crumb->latitude,
+                   'longitude' => $crumb->longitude,
+                   'title' => $crumb->title
+               ); 
+        }
+        $response->setJsonContent(
+            array(
+	            'status' => 'FOUND',
+	            'data' => $data
+            )
+        );
+    }
+
+    return $response;
+});
+
+
 
 /* Handle a request when the file/function they requested is not 
 available.*/
