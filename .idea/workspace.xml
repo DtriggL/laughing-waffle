@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
+<<<<<<< HEAD
+    <list default="true" id="8229d123-f1d4-4bdd-8a25-6df1e79cf81b" name="Default" comment="" />
+=======
     <list default="true" id="2859ebfa-ea25-41ef-a923-77c652fc5f9b" name="Default" comment="" />
+>>>>>>> 5c9595ae8de266da7c7411aafc21c16a470d52c2
     <ignored path="MobileProjectMaster.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -45,7 +49,11 @@
     <ConfirmationsSetting value="0" id="Remove" />
   </component>
   <component name="ProjectView">
+<<<<<<< HEAD
+    <navigator currentView="AndroidView" proportions="" version="1">
+=======
     <navigator currentView="ProjectPane" proportions="" version="1">
+>>>>>>> 5c9595ae8de266da7c7411aafc21c16a470d52c2
       <flattenPackages />
       <showMembers />
       <showModules />
@@ -57,6 +65,26 @@
       <sortByType />
     </navigator>
     <panes>
+<<<<<<< HEAD
+      <pane id="AndroidView">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MobileProjectMaster" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MobileProjectMaster" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.NonAndroidModuleNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="PackagesPane" />
+      <pane id="Scratches" />
+      <pane id="Scope" />
+=======
+>>>>>>> 5c9595ae8de266da7c7411aafc21c16a470d52c2
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -74,6 +102,8 @@
               <option name="myItemId" value="MobileProjectMaster" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+<<<<<<< HEAD
+=======
             <PATH_ELEMENT>
               <option name="myItemId" value="server_app" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
@@ -82,6 +112,7 @@
               <option name="myItemId" value="crumb.io" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+>>>>>>> 5c9595ae8de266da7c7411aafc21c16a470d52c2
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -92,6 +123,15 @@
               <option name="myItemId" value="MobileProjectMaster" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+<<<<<<< HEAD
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobile_app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="crumble" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+=======
           </PATH>
         </subPane>
       </pane>
@@ -107,11 +147,15 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="MobileProjectMaster" />
               <option name="myItemType" value="com.android.tools.idea.navigator.nodes.NonAndroidModuleNode" />
+>>>>>>> 5c9595ae8de266da7c7411aafc21c16a470d52c2
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
+<<<<<<< HEAD
+=======
       <pane id="PackagesPane" />
+>>>>>>> 5c9595ae8de266da7c7411aafc21c16a470d52c2
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -119,6 +163,10 @@
     <property name="settings.editor.splitter.proportion" value="0.3033419" />
     <property name="android.project.structure.last.selected" value="SDK Location" />
     <property name="android.project.structure.proportion" value="0.15" />
+<<<<<<< HEAD
+    <property name="FullScreen" value="true" />
+=======
+>>>>>>> 5c9595ae8de266da7c7411aafc21c16a470d52c2
     <property name="last_opened_file_path" value="$PROJECT_DIR$/mobile_app" />
   </component>
   <component name="RunManager">
@@ -210,10 +258,17 @@
   <component name="ShelveChangesManager" show_recycled="false" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
+<<<<<<< HEAD
+      <changelist id="8229d123-f1d4-4bdd-8a25-6df1e79cf81b" name="Default" comment="" />
+      <created>1459656255249</created>
+      <option name="number" value="Default" />
+      <updated>1459656255249</updated>
+=======
       <changelist id="2859ebfa-ea25-41ef-a923-77c652fc5f9b" name="Default" comment="" />
       <created>1457490714692</created>
       <option name="number" value="Default" />
       <updated>1457490714692</updated>
+>>>>>>> 5c9595ae8de266da7c7411aafc21c16a470d52c2
     </task>
     <servers />
   </component>

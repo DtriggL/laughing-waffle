@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
+<<<<<<< HEAD
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$" />
+=======
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file:///production/mobile_app" />
     <output-test url="file:///test/mobile_app" />
@@ -8,6 +13,7 @@
       <sourceFolder url="file://$MODULE_DIR$/crumble/app/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crumble/app/src/androidTest" isTestSource="true" />
     </content>
+>>>>>>> 5c9595ae8de266da7c7411aafc21c16a470d52c2
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
