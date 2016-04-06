@@ -326,7 +326,7 @@ $app->get('/api/crumb/all', function () use ($app) {
         }
         $response->setJsonContent(
             array(
-	            'status' => 'FOUND',
+	            'status' => 'NOT-FOUND',
 	            'data' => $data
             )
         );

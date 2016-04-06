@@ -1,4 +1,4 @@
-package trigg.us.crumble;
+package us.trigg.crumble;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

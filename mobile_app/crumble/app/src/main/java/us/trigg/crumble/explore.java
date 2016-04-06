@@ -1,4 +1,4 @@
-package trigg.us.crumble;
+package us.trigg.crumble;
 
 import android.content.Intent;
 import android.support.design.widget.NavigationView;

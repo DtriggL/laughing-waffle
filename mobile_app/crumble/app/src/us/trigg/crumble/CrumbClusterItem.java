@@ -1,4 +1,4 @@
-package trigg.us.crumble;
+package us.trigg.crumble;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
