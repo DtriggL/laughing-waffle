@@ -1,8 +1,15 @@
-package us.trigg.crumble;
+package trigg.us.crumble;
 
+import android.content.Intent;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -15,16 +22,18 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.HashMap;
-import java.util.Map;
 
 // TODO:
 //  1. Override the MarkerCluster OnInfoWindowListener
 
-public class explore extends FragmentActivity implements OnMapReadyCallback {
+public class Explore extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener  {
 
     private GoogleMap mMap;
     private ClusterManager<CrumbClusterItem> mClusterManager;
     private HashMap<Marker, Crumb> markers;
+    private ImageButton buttonname;
+
+    public static final String TAG = "Explore";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +43,16 @@ public class explore extends FragmentActivity implements OnMapReadyCallback {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        Log.d(TAG, "onCreate finished");
+
+        buttonname = (ImageButton) findViewById(R.id.searchImageButton) ;
+        buttonname.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+            }
+        });
     }
 
 
@@ -55,12 +74,15 @@ public class explore extends FragmentActivity implements OnMapReadyCallback {
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
+        Log.d(TAG, "on Map Ready, about to set up clusterer");
         // Add a the markers from the hashmap to the map
 
         setUpClusterer();
         // Test Code:
         // Position the map.
+        Log.d(TAG, "set up clusterer");
         getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(5, -5), 10));
+        Log.d(TAG, "getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(5, -5), 10));");
     }
 
     /**
@@ -68,6 +90,7 @@ public class explore extends FragmentActivity implements OnMapReadyCallback {
      */
     public void download() {
         // Attempt to perform the download
+        Log.d(TAG, "download");
         try {
             // Open a connection to the PHP server.
             // Get the response code
@@ -95,6 +118,7 @@ public class explore extends FragmentActivity implements OnMapReadyCallback {
     }
 
     public GoogleMap getMap() {
+        Log.d(TAG, "map is about to be returned");
         return mMap;
     }
     //-------------------------------------------------------------------------
@@ -151,7 +175,7 @@ public class explore extends FragmentActivity implements OnMapReadyCallback {
         // manager.
         getMap().setOnCameraChangeListener(mClusterManager);
         getMap().setOnMarkerClickListener(mClusterManager);
-
+        Log.d(TAG, "in clustere, getMap() is run");
         // Add cluster items (markers) to the cluster manager.
         addItems();
     }
@@ -162,7 +186,34 @@ public class explore extends FragmentActivity implements OnMapReadyCallback {
             double offset = i/60d;
             mClusterManager.addItem(new CrumbClusterItem(new Crumb(new LatLng(5,-5 + offset))));
         }
+        Log.d(TAG, "All items added to map");
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+        Log.d(TAG, "on navigation item selected");
+        if (id == R.id.explore) {
+            Intent intent = new Intent(this, Explore.class);
+            intent.putExtra(TAG, 1);
+            Log.d(TAG, "explore icon clicked");
+            startActivity(intent);
+        } else if (id == R.id.logbook) {
 
+        } else if (id == R.id.myPins) {
+
+        } else if (id == R.id.nearMe) {
+
+        } else if (id == R.id.options) {
+
+        } else if (id == R.id.nav_share) {
+
+        }
+        Log.d(TAG, "explore activity finished, or drawer about to close");
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
 }

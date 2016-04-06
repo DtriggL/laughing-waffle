@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="us.trigg.crumble">
+    package="trigg.us.crumble">
 
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -29,14 +29,20 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".explore"
-            android:label="@string/title_activity_explore">
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".Explore"
+            android:label="@string/title_activity_explore">
+        </activity>
+
     </application>
 
 </manifest>

@@ -1,4 +1,4 @@
-package us.trigg.crumble;
+package trigg.us.crumble;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
