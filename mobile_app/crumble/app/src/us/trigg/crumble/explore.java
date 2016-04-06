@@ -29,7 +29,7 @@ import java.util.Random;
 // TODO:
 //  1. Override the MarkerCluster OnInfoWindowListener
 
-public class explore extends FragmentActivity implements OnMapReadyCallback {
+class explore extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private ClusterManager<CrumbClusterItem> mClusterManager;
