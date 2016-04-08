@@ -26,11 +26,10 @@ import java.util.HashMap;
 // TODO:
 //  1. Override the MarkerCluster OnInfoWindowListener
 
-public class Explore extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener  {
+public class Explore extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
 
     private GoogleMap mMap;
     private ClusterManager<CrumbClusterItem> mClusterManager;
-    private HashMap<Marker, Crumb> markers;
     private ImageButton buttonname;
 
     public static final String TAG = "Explore";
@@ -49,7 +48,7 @@ public class Explore extends FragmentActivity implements OnMapReadyCallback, Nav
         buttonname.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                // Add code to open menu
 
             }
         });
@@ -75,7 +74,7 @@ public class Explore extends FragmentActivity implements OnMapReadyCallback, Nav
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
         Log.d(TAG, "on Map Ready, about to set up clusterer");
-        // Add a the markers from the hashmap to the map
+        // Add a the crumbs from the database to the map as markers
 
         setUpClusterer();
         // Test Code:
@@ -88,7 +87,7 @@ public class Explore extends FragmentActivity implements OnMapReadyCallback, Nav
     /**
      * Downloads the database of markers from the server and stores them in a database structure.
      */
-    public void download() {
+    public void downloadAllCrumbs() {
         // Attempt to perform the download
         Log.d(TAG, "download");
         try {
@@ -159,7 +158,7 @@ public class Explore extends FragmentActivity implements OnMapReadyCallback, Nav
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                download();
+                downloadAllCrumbs();
             }
         };
         Thread t = new Thread(r);

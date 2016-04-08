@@ -31,11 +31,6 @@
         <activity
             android:name="us.trigg.crumble.MainActivity"
             android:label="@string/title_activity_main">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
             <!-- ATTENTION: This intent was auto-generated. Follow instructions at
               https://g.co/AppIndexing/AndroidStudio to publish your Android app deep links. -->
             <intent-filter>
@@ -74,6 +69,10 @@
         <activity
             android:name="us.trigg.crumble.Explore"
             android:label="@string/title_activity_explore">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 
