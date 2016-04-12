@@ -1,16 +1,17 @@
 package us.trigg.crumble;
 
-import android.net.Uri;
+import android.content.Intent;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -20,24 +21,18 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
 
-import org.w3c.dom.Text;
-
 import java.util.HashMap;
-import java.util.Map;
 
 // TODO:
 //  1. Override the MarkerCluster OnInfoWindowListener
 
-class explore extends FragmentActivity implements OnMapReadyCallback {
+public class Explore extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
 
     private GoogleMap mMap;
     private ClusterManager<CrumbClusterItem> mClusterManager;
-    private HashMap<Marker, Crumb> markers;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
+    private ImageButton buttonname;
+
+    public static final String TAG = "Explore";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +42,16 @@ class explore extends FragmentActivity implements OnMapReadyCallback {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+        Log.d(TAG, "onCreate finished");
+
+        buttonname = (ImageButton) findViewById(R.id.searchImageButton) ;
+        buttonname.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Add code to open menu
+
+            }
+        });
     }
 
 
@@ -71,19 +73,23 @@ class explore extends FragmentActivity implements OnMapReadyCallback {
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
-        // Add a the markers from the hashmap to the map
+        Log.d(TAG, "on Map Ready, about to set up clusterer");
+        // Add a the crumbs from the database to the map as markers
 
         setUpClusterer();
         // Test Code:
         // Position the map.
+        Log.d(TAG, "set up clusterer");
         getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(5, -5), 10));
+        Log.d(TAG, "getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(5, -5), 10));");
     }
 
     /**
      * Downloads the database of markers from the server and stores them in a database structure.
      */
-    public void download() {
+    public void downloadAllCrumbs() {
         // Attempt to perform the download
+        Log.d(TAG, "download");
         try {
             // Open a connection to the PHP server.
             // Get the response code
@@ -105,63 +111,25 @@ class explore extends FragmentActivity implements OnMapReadyCallback {
             } finally {
                 // Close the input streams
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
 
         }
     }
 
     public GoogleMap getMap() {
+        Log.d(TAG, "map is about to be returned");
         return mMap;
     }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "explore Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://us.trigg.crumble/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(client, viewAction);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "explore Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://us.trigg.crumble/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
-        client.disconnect();
-    }
-
     //-------------------------------------------------------------------------
     // Private Classes
     //-------------------------------------------------------------------------
     private class MyInfoWindow implements GoogleMap.OnInfoWindowClickListener,
-            GoogleMap.InfoWindowAdapter {
+        GoogleMap.InfoWindowAdapter {
         private View myInfoWindowView;
 
         public MyInfoWindow() {
+            // Add your custom layout here
+            //myInfoWindowView = getLayoutInflater().inflate(R.layout.my_custom_info_layout, null);
         }
 
         @Override
@@ -179,37 +147,7 @@ class explore extends FragmentActivity implements OnMapReadyCallback {
 
         @Override
         public View getInfoWindow(Marker marker) {
-            // Get the layout
-            myInfoWindowView = getLayoutInflater().inflate(R.layout.info_window, null);
-            // Set the text elements within the layout
-            TextView title = (TextView) myInfoWindowView.findViewById(R.id.info_title);
-            // TODO: Lookup crumb name and set as title
-            // For now, set title to be "Name"
-            title.setText("Name");
-
-            TextView bites = (TextView) myInfoWindowView.findViewById(R.id.bites_num);
-            // TODO: Lookup crumb bites and set here
-            // For now, set bites to be 0
-            bites.setText("0");
-
-            // Set the images within the layout
-            ImageView star = (ImageView) myInfoWindowView.findViewById(R.id.rating_img);
-            star.setImageResource(R.drawable.star);
-            ImageView hiker = (ImageView) myInfoWindowView.findViewById(R.id.bites_img);
-            hiker.setImageResource(R.drawable.hikingman);
-
-            return myInfoWindowView;
-        }
-    }
-
-    private class MyOnMarkerClick implements GoogleMap.OnMarkerClickListener {
-
-        @Override
-        public boolean onMarkerClick(Marker marker) {
-            Toast.makeText(getApplicationContext(), "Marker clicked",
-                    Toast.LENGTH_SHORT).show();
-            marker.showInfoWindow();
-            return true;
+            return null;
         }
     }
 
@@ -220,7 +158,7 @@ class explore extends FragmentActivity implements OnMapReadyCallback {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                download();
+                downloadAllCrumbs();
             }
         };
         Thread t = new Thread(r);
@@ -235,10 +173,8 @@ class explore extends FragmentActivity implements OnMapReadyCallback {
         // Point the map's listeners at the listeners implemented by the cluster
         // manager.
         getMap().setOnCameraChangeListener(mClusterManager);
-        getMap().setOnMarkerClickListener(new MyOnMarkerClick());
-        // Pass this function the custom layout.
-        getMap().setInfoWindowAdapter(new MyInfoWindow());
-
+        getMap().setOnMarkerClickListener(mClusterManager);
+        Log.d(TAG, "in clustere, getMap() is run");
         // Add cluster items (markers) to the cluster manager.
         addItems();
     }
@@ -246,10 +182,37 @@ class explore extends FragmentActivity implements OnMapReadyCallback {
     private void addItems() {
         // Initial test code: add ten objects to the cluster manager
         for (int i = 0; i < 10; i++) {
-            double offset = i / 60d;
-            mClusterManager.addItem(new CrumbClusterItem(new Crumb(new LatLng(5, -5 + offset))));
+            double offset = i/60d;
+            mClusterManager.addItem(new CrumbClusterItem(new Crumb(new LatLng(5,-5 + offset))));
         }
+        Log.d(TAG, "All items added to map");
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+        Log.d(TAG, "on navigation item selected");
+        if (id == R.id.explore) {
+            Intent intent = new Intent(this, Explore.class);
+            intent.putExtra(TAG, 1);
+            Log.d(TAG, "explore icon clicked");
+            startActivity(intent);
+        } else if (id == R.id.logbook) {
 
+        } else if (id == R.id.myPins) {
+
+        } else if (id == R.id.nearMe) {
+
+        } else if (id == R.id.options) {
+
+        } else if (id == R.id.nav_share) {
+
+        }
+        Log.d(TAG, "explore activity finished, or drawer about to close");
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
 }

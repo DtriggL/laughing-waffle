@@ -9,7 +9,6 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
-    android:background="@drawable/logbookbackground"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="us.trigg.crumble.MainActivity"
     tools:showIn="@layout/app_bar_main">
@@ -18,7 +17,7 @@
         android:id="@+id/logbookTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Logbook"
+        android:text="@string/logbook"
         android:textSize="30dp"
         android:layout_gravity="center"
         android:textColor="@color/colorAccent"/>
