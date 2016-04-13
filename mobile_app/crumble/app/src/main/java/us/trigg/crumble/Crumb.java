@@ -8,6 +8,7 @@ import java.util.Date;
  * Created by trigglatour on 3/1/16.
  */
 public class Crumb {
+    private int id;
     private String name;        // Name of the crumb
     private int bites;          // Number of people to find the crumb
     private LatLng position;
