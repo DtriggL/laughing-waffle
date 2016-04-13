@@ -29,8 +29,9 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name="us.trigg.crumble.MainActivity"
-            android:label="@string/title_activity_main">
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -38,11 +39,9 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name="us.trigg.crumble.Explore"
-            android:label="@string/title_activity_explore">
-        </activity>
-
+        <service
+            android:name=".MapIntentService"
+            android:exported="false"></service>
     </application>
 
 </manifest>
