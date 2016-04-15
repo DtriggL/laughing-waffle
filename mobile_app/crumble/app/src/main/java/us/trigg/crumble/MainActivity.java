@@ -29,13 +29,16 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import static us.trigg.crumble.WebConstants.*;
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
@@ -48,8 +51,8 @@ public class MainActivity extends AppCompatActivity implements
     public static final String EXTRA_MESSAGE = "Explore Activity";
     public static final String TAG = "Main Activity";
 
-    private ClusterManager<CrumbClusterItem> mClusterManager;
-    private HashMap<Marker, Crumb> markers;
+    private ClusterManager<Crumb> mClusterManager;
+    //private HashMap<Marker, Crumb> markers;
 
     private GoogleMap mMap;
     protected GoogleApiClient mGoogleApiClient;
@@ -86,11 +89,14 @@ public class MainActivity extends AppCompatActivity implements
         sMapFragment = SupportMapFragment.newInstance();
         sMapFragment.getMapAsync(this);
 
+        // Start a fused API to get the user's current location
+
+
     }
 
 
     //-----------------------------------------------------------------------------------
-    // Map Event Handlers
+    // Google Map Event Handlers
     //-----------------------------------------------------------------------------------
     /**
      * Manipulates the map once available.
@@ -105,19 +111,25 @@ public class MainActivity extends AppCompatActivity implements
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
         Log.d(TAG, "on Map Ready, about to set up clusterer");
-        // Add a the markers from the hashmap to the map
 
         setUpClusterer();
 
         // Get all of the crumbs from the server and add them to the map
         new GetAllCrumbs().execute(null, null, null);
     }
+
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return false;
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        return false;
+    }
+
 
     //-----------------------------------------------------------------------------------
     // Google API Event Handlers
@@ -131,15 +143,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) { }
 
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        return false;
-    }
+    //-----------------------------------------------------------------------------------
+    // Fused Location API event handlers
+    //-----------------------------------------------------------------------------------
 
-    @Override
-    public boolean onMyLocationButtonClick() {
-        return false;
-    }
 
     //-----------------------------------------------------------------------------------
     // Navigation Drawer Event Handlers
@@ -232,17 +239,61 @@ public class MainActivity extends AppCompatActivity implements
     // Private Methods
     //-----------------------------------------------------------------------------------
     private void addCrumbs(JSONObject json) {
+        Log.d(TAG, "In add crumbs.");
         // 1. Wait for the mMap object to be non-null
         synchronized (mMap) {
             try {
                 if (mMap == null) {
                     Thread.sleep(20);
                 } else {
+                    Log.d(TAG, "Adding crumbs to the map.");
                     // 2. Add all of the information from the data JSON object to the map as crumbs
                     try {
                         // Check to see if the request was a success
-                        if (json.getString(GetAllCrumbs.TAG_SUCCESS).compareTo("OKAY") == 0) {
+                        if (json.getString(GetAllCrumbs.TAG_SUCCESS).compareTo("FOUND") == 0) {
+                            // Loop through the results in data[] to add the crumbs
+                            JSONArray data = json.getJSONArray(GetAllCrumbs.TAG_PAYLOAD);
+                            Log.d(TAG, "Data length is: " + data.length());
+                            for (int i = 0; i < data.length(); i++) {
+                                // Got the object
+                                JSONObject mJSONCrumb = data.getJSONObject(i);
+                                // DEBUG
+                                //Log.d(TAG, mJSONCrumb.toString());
+                                // Create a Crumb object
+                                Crumb crumb = new Crumb();
+                                crumb.setTitle(mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_TITLE));
+                                String lat = mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_LATITUDE);
+                                String longi = mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_LONGITUDE);
+                                // We will set the location of the crumb later on after we determine that these values are valid
 
+                                //DEBUG
+                                Log.d(TAG, "Title is: " + crumb.getTitle());
+                                Log.d(TAG, "Latitude is: " + lat);
+                                Log.d(TAG, "Longitude is: " + longi);
+
+                                // Create a marker from the crumb
+                                // Attempt to convert the stored string into a coordinate (double)
+                                LatLng pos = null;
+                                boolean conversionSuccess;
+                                try {
+                                    pos = new LatLng(Location.convert(lat), Location.convert(longi));
+                                    conversionSuccess = true;
+                                } catch (IllegalArgumentException e) {
+                                    conversionSuccess = false;
+                                    Log.e(TAG, "Unable to add crumb becase of illeagal format.");
+                                } catch (NullPointerException e) {
+                                    conversionSuccess = false;
+                                    Log.e(TAG, "Unable to add crumb becase of null pointer.");
+                                }
+                                // If the location conversion was a success, add the crumb to the cluster manager
+                                // and consequentially to the map.
+                                if (conversionSuccess == true && pos != null) {
+                                    crumb.setLocation(lat, longi);
+                                    synchronized (mClusterManager) {
+                                        mClusterManager.addItem(crumb);
+                                    }
+                                }
+                            }
                         }
                     }
                     catch (JSONException e) {
@@ -260,24 +311,14 @@ public class MainActivity extends AppCompatActivity implements
     private void setUpClusterer() {
         // Initialize the manager with the context and the map.
         // (Activity extends context, so we can pass 'this' in the constructor.)
-        mClusterManager = new ClusterManager<CrumbClusterItem>(this, getMap());
+        mClusterManager = new ClusterManager<Crumb>(this, getMap());
 
         // Point the map's listeners at the listeners implemented by the cluster
         // manager.
+        mClusterManager.setOnClusterItemClickListener(new ClusterItemClickListener());
         getMap().setOnCameraChangeListener(mClusterManager);
         getMap().setOnMarkerClickListener(mClusterManager);
-        Log.d(TAG, "in clustere, getMap() is run");
-        // Add cluster items (markers) to the cluster manager.
-        addItems();
-    }
 
-    private void addItems() {
-        // Initial test code: add ten objects to the cluster manager
-        for (int i = 0; i < 10; i++) {
-            double offset = i/60d;
-            mClusterManager.addItem(new CrumbClusterItem(new Crumb(new LatLng(5,-5 + offset))));
-        }
-        Log.d(TAG, "All items added to map");
     }
 
 
@@ -285,6 +326,15 @@ public class MainActivity extends AppCompatActivity implements
     // Private Classes
     //-----------------------------------------------------------------------------------
 
+    //-----------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
+    private class ClusterItemClickListener implements ClusterManager.OnClusterItemClickListener<Crumb> {
+
+        @Override
+        public boolean onClusterItemClick(Crumb crumb) {
+            return false;
+        }
+    }
 
     //-----------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------
@@ -304,6 +354,7 @@ public class MainActivity extends AppCompatActivity implements
 
         // Status results
         public static final String TAG_SUCCESS = "status";
+        public static final String TAG_PAYLOAD = "data";
 
         /**
          * Before starting background thread Show Progress Dialog
@@ -311,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            pDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_SPINNER);
             pDialog.setMessage("Retreiving crumbs...");
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
@@ -323,10 +375,6 @@ public class MainActivity extends AppCompatActivity implements
                 // Get crumbs by making HTTP request
                 mJson = jsonParser.makeHttpRequest(
                         WebConstants.URL_ALL_CRUMBS, "GET", null);
-
-                // check your log for json response
-                Log.d("Response", mJson.toString());
-
                 // json success tag
                 status = mJson.getString(TAG_SUCCESS);
 
@@ -345,7 +393,7 @@ public class MainActivity extends AppCompatActivity implements
                     /**
                      * Call function in UI thread to update the  map
                      * */
-                    addCrumbs(mJson);
+                        addCrumbs(mJson);
                 }
             }).run();
         }

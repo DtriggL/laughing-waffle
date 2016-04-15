@@ -55,8 +55,11 @@ public class JSONParser {
             }else if(method == "GET"){
                 // request method is GET
                 DefaultHttpClient httpClient = new DefaultHttpClient();
-                String paramString = URLEncodedUtils.format(params, "utf-8");
-                url += "?" + paramString;
+                if (params != null) {
+                    String paramString = URLEncodedUtils.format(params, "utf-8");
+                    url += "?" + paramString;
+                }
+                Log.d("JSON Parser", "Executing GET. URL is: " + url );
                 HttpGet httpGet = new HttpGet(url);
 
                 HttpResponse httpResponse = httpClient.execute(httpGet);
@@ -83,6 +86,7 @@ public class JSONParser {
             }
             is.close();
             json = sb.toString();
+            Log.v("JSON Parser", json);
         } catch (Exception e) {
             Log.e("Buffer Error", "Error converting result " + e.toString());
         }
@@ -96,6 +100,5 @@ public class JSONParser {
 
         // return JSON String
         return jObj;
-
     }
 }

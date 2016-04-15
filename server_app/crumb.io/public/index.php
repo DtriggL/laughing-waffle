@@ -38,24 +38,24 @@ $app = new Micro($di);
 // URL: http://uaf132701.ddns.uark.edu/api/crumb/add
 // Method: POST
 // Payload: JSON Crumb Object: Fields are:
-//    1. user_id
+//    1. creator_id
 //    2. title
 //    2. latitude
 //    3. longitude
-//    4. text
+//    4. messafe
 //-------------------------------------------------------------------------------
 $app->post('/api/crumb/add', function () use ($app) {
     // Get the raw JSON content
     $item = $app->request->getJsonRawBody();
 
-    $phql = "INSERT INTO Crumb (user_id, latitude, longitude, text, title) VALUES (:user_id:, :latitude:, :longitude:, :text:, :title:)";
+    $phql = "INSERT INTO Crumb (creator_id, latitude, longitude, message, title) VALUES (:creator_id:, :latitude:, :longitude:, :message:, :title:)";
     // Get a collection of users that meet the criteria
     $status = $app->modelsManager->executeQuery($phql, array(
-        'user_id' => $item->user_id,
+        'creator_id' => $item->creator_id,
         'latitude' => $item->latitude,
         'longitude' => $item->longitude,
         'title' => $item->title,
-        'text' => $item->text
+        'message' => $item->message
     ));
 
     // Create a response
@@ -65,7 +65,7 @@ $app->post('/api/crumb/add', function () use ($app) {
         // Change the HTTP status
         $response->setStatusCode(201, "Created");
 
-        $item->note_id = $status->getModel()->note_id;
+        $item->crumb_id = $status->getModel()->crumb_id;
 
         $response->setJsonContent(
             array(
@@ -112,7 +112,7 @@ $app->post('/api/crumb/add', function () use ($app) {
 //        }
 //-------------------------------------------------------------------------------
 $app->get('/api/crumb/{id:[0-9]+}', function ($id) use ($app) {
-	$phql = "SELECT * FROM Crumb WHERE note_id = :id:";
+	$phql = "SELECT * FROM Crumb WHERE crumb_id = :id:";
 
 	//Get the list that matches the given list id
 	$crumbs = $app->modelsManager->executeQuery($phql, array(
@@ -136,12 +136,12 @@ $app->get('/api/crumb/{id:[0-9]+}', function ($id) use ($app) {
            array(
                 'status' => 'FOUND',
                 'data' => array(
-                    'note_id' => $crumb->user_id,
-                    'user_id' => $crumb->user_id,
+                    'crumb_id' => $crumb->crumb_id,
+                    'creator_id' => $crumb->creator_id,
                     'latitude' => $crumb->latitude,
                     'longitude' => $crumb->longitude,
                     'title' => $crumb->title,
-                    'text' => $crumb->text
+                    'message' => $crumb->message
                     )
             )
         );
@@ -160,11 +160,11 @@ $app->post('/api/crumb/edit', function () use ($app) {
     // Get the raw JSON content
     $crumb = $app->request->getJsonRawBody();
 
-    $phql = "UPDATE Crumb SET title = :title:, text = :text: WHERE note_id = :id:";
+    $phql = "UPDATE Crumb SET title = :title:, message = :message: WHERE crumb_id = :id:";
     $status = $app->modelsManager->executeQuery($phql, array(
-        'id' => $crumb->note_id,
+        'id' => $crumb->crumb_id,
         'title' => $crumb->title,
-        'text' => $crumb->text
+        'message' => $crumb->message
     ));
 
     // Create a response
@@ -294,7 +294,7 @@ $app->post('/api/user/add', function () use ($app) {
 //
 // Notes
 // -----
-// The crumbs returned are only partial crumbs that do not include user_id or
+// The crumbs returned are only partial crumbs that do not include creator_id or
 // text fields.
 //-------------------------------------------------------------------------------
 $app->get('/api/crumb/all', function () use ($app) {
@@ -308,7 +308,7 @@ $app->get('/api/crumb/all', function () use ($app) {
 
 	if($crumbs == false) {
 	    $response->setJsonContent(
-	    array(
+	    array(l
 	        'status' => 'NOT-FOUND')
 	    );
 	}
@@ -318,7 +318,7 @@ $app->get('/api/crumb/all', function () use ($app) {
         $data = array();
         foreach ($crumbs as $crumb) {
                $data[] = array(
-                   'note_id' => $crumb->note_id,
+                   'crumb_id' => $crumb->crumb_id,
                    'latitude' => $crumb->latitude,
                    'longitude' => $crumb->longitude,
                    'title' => $crumb->title

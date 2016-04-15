@@ -4,17 +4,25 @@ use Phalcon\Mvc\Model;
 
 class Crumb extends Model
 {
-    public $note_id;
-
-    public $user_id;
+    public $crumb_id;
 
     public $longitude;
 
     public $latitude;
-
-    public $text;
+    
+    public $message;
 
     public $title;
+    
+    public $rating;
+    
+    public $ratings;
+    
+    public $creation_date;
+    
+    public $total_discovered;
+    
+    public $creator_id;
 
     public function getSource()
     {

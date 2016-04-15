@@ -36,7 +36,7 @@ Crumble-api
 //
 // Notes
 // -----
-// The crumbs returned are only partial crumbs that do not include user_id or
+// The crumbs returned are only partial crumbs that do not include creator_id or
 // text fields.
 //-------------------------------------------------------------------------------
 
@@ -46,11 +46,11 @@ Crumble-api
 // URL: http://uaf132701.ddns.uark.edu/api/crumb/add
 // Method: POST
 // Payload: JSON Crumb Object: Fields are:
-//    1. user_id
+//    1. creator_id
 //    2. title
 //    2. latitude
 //    3. longitude
-//    4. text
+//    4. message
 //-------------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------------
@@ -59,9 +59,9 @@ Crumble-api
 // URL: http://uaf132701.ddns.uark.edu/api/crumb/edit
 // Method: POST
 // Payload: JSON Crumb Object: Required* Fields are:
-//    1. note_id
+//    1. crumb_id
 //    2. title
-//    4. text
+//    4. message
 //
 // *These 3 fields are required, however, more can be submitted, so you can 
 //  simply parse a crumb object as a JSON, and send it on up as long as it
