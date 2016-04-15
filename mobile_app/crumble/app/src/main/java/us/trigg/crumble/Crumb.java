@@ -17,7 +17,7 @@ public class Crumb implements ClusterItem {
     private int crumb_id;
     private String title;
     private int total_discovered;          // Number of people who found the crumb
-    private String latittude;
+    private String latitude;
     private String longitude;
     private String message;        // The message attached to the crumb
     private Date creation_date;  // The date that the note was written
@@ -38,7 +38,7 @@ public class Crumb implements ClusterItem {
     //-----------------------------------------------------------------
     @Override
     public LatLng getPosition() {
-        return new LatLng(Location.convert(latittude), Location.convert(longitude));
+        return new LatLng(Location.convert(latitude), Location.convert(longitude));
     }
     public String getTitle(){
         return title;
@@ -51,7 +51,7 @@ public class Crumb implements ClusterItem {
         title = t;
     }
     public void setLocation(String lat, String longi) {
-        latittude = lat;
+        latitude = lat;
         longitude = longi;
     }
     public void setCrumb_id(int id) {

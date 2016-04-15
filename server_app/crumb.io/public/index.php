@@ -32,7 +32,7 @@ $di->set('db', function () {
 $app = new Micro($di);
 
 
-//—------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 // Function Name: addCrumb
 // Description: Add a crumb to the database
 // URL: http://uaf132701.ddns.uark.edu/api/crumb/add
@@ -65,7 +65,7 @@ $app->post('/api/crumb/add', function () use ($app) {
         // Change the HTTP status
         $response->setStatusCode(201, "Created");
 
-        $item->crumb_id = $status->getModel()->crumb_id;
+        //$item->crumb_id = $status->getModel()->crumb_id;
 
         $response->setJsonContent(
             array(
@@ -308,7 +308,7 @@ $app->get('/api/crumb/all', function () use ($app) {
 
 	if($crumbs == false) {
 	    $response->setJsonContent(
-	    array(l
+	    array(
 	        'status' => 'NOT-FOUND')
 	    );
 	}
