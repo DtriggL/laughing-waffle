@@ -238,74 +238,77 @@ public class MainActivity extends AppCompatActivity implements
     //-----------------------------------------------------------------------------------
     // Private Methods
     //-----------------------------------------------------------------------------------
+
+    //-----------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
     private void addCrumbs(JSONObject json) {
-        Log.d(TAG, "In add crumbs.");
-        // 1. Wait for the mMap object to be non-null
-        synchronized (mMap) {
-            try {
-                if (mMap == null) {
-                    Thread.sleep(20);
-                } else {
-                    Log.d(TAG, "Adding crumbs to the map.");
-                    // 2. Add all of the information from the data JSON object to the map as crumbs
-                    try {
-                        // Check to see if the request was a success
-                        if (json.getString(GetAllCrumbs.TAG_SUCCESS).compareTo("FOUND") == 0) {
-                            // Loop through the results in data[] to add the crumbs
-                            JSONArray data = json.getJSONArray(GetAllCrumbs.TAG_PAYLOAD);
-                            Log.d(TAG, "Data length is: " + data.length());
-                            for (int i = 0; i < data.length(); i++) {
-                                // Got the object
-                                JSONObject mJSONCrumb = data.getJSONObject(i);
-                                // DEBUG
-                                //Log.d(TAG, mJSONCrumb.toString());
-                                // Create a Crumb object
-                                Crumb crumb = new Crumb();
-                                crumb.setTitle(mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_TITLE));
-                                String lat = mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_LATITUDE);
-                                String longi = mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_LONGITUDE);
-                                // We will set the location of the crumb later on after we determine that these values are valid
+        if (json != null) {
+            Log.d(TAG, "In add crumbs.");
+            // 1. Wait for the mMap object to be non-null
+            synchronized (mMap) {
+                try {
+                    if (mMap == null) {
+                        Thread.sleep(20);
+                    } else {
+                        Log.d(TAG, "Adding crumbs to the map.");
+                        // 2. Add all of the information from the data JSON object to the map as crumbs
+                        try {
+                            // Check to see if the request was a success
+                            if (json.getString(GetAllCrumbs.TAG_SUCCESS).compareTo("FOUND") == 0) {
+                                // Loop through the results in data[] to add the crumbs
+                                JSONArray data = json.getJSONArray(GetAllCrumbs.TAG_PAYLOAD);
+                                Log.d(TAG, "Data length is: " + data.length());
+                                for (int i = 0; i < data.length(); i++) {
+                                    // Got the object
+                                    JSONObject mJSONCrumb = data.getJSONObject(i);
+                                    // DEBUG
+                                    //Log.d(TAG, mJSONCrumb.toString());
+                                    // Create a Crumb object
+                                    Crumb crumb = new Crumb();
+                                    crumb.setTitle(mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_TITLE));
+                                    String lat = mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_LATITUDE);
+                                    String longi = mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_LONGITUDE);
+                                    // We will set the location of the crumb later on after we determine that these values are valid
 
-                                //DEBUG
-                                Log.d(TAG, "Title is: " + crumb.getTitle());
-                                Log.d(TAG, "Latitude is: " + lat);
-                                Log.d(TAG, "Longitude is: " + longi);
+                                    //DEBUG
+                                    Log.d(TAG, "Title is: " + crumb.getTitle());
+                                    Log.d(TAG, "Latitude is: " + lat);
+                                    Log.d(TAG, "Longitude is: " + longi);
 
-                                // Create a marker from the crumb
-                                // Attempt to convert the stored string into a coordinate (double)
-                                LatLng pos = null;
-                                boolean conversionSuccess;
-                                try {
-                                    pos = new LatLng(Location.convert(lat), Location.convert(longi));
-                                    conversionSuccess = true;
-                                } catch (IllegalArgumentException e) {
-                                    conversionSuccess = false;
-                                    Log.e(TAG, "Unable to add crumb becase of illeagal format.");
-                                } catch (NullPointerException e) {
-                                    conversionSuccess = false;
-                                    Log.e(TAG, "Unable to add crumb becase of null pointer.");
-                                }
-                                // If the location conversion was a success, add the crumb to the cluster manager
-                                // and consequentially to the map.
-                                if (conversionSuccess == true && pos != null) {
-                                    crumb.setLocation(lat, longi);
-                                    synchronized (mClusterManager) {
-                                        mClusterManager.addItem(crumb);
+                                    // Create a marker from the crumb
+                                    // Attempt to convert the stored string into a coordinate (double)
+                                    LatLng pos = null;
+                                    boolean conversionSuccess;
+                                    try {
+                                        pos = new LatLng(Location.convert(lat), Location.convert(longi));
+                                        conversionSuccess = true;
+                                    } catch (IllegalArgumentException e) {
+                                        conversionSuccess = false;
+                                        Log.e(TAG, "Unable to add crumb becase of illeagal format.");
+                                    } catch (NullPointerException e) {
+                                        conversionSuccess = false;
+                                        Log.e(TAG, "Unable to add crumb becase of null pointer.");
+                                    }
+                                    // If the location conversion was a success, add the crumb to the cluster manager
+                                    // and consequentially to the map.
+                                    if (conversionSuccess == true && pos != null) {
+                                        crumb.setLocation(lat, longi);
+                                        synchronized (mClusterManager) {
+                                            mClusterManager.addItem(crumb);
+                                        }
                                     }
                                 }
                             }
+                        } catch (JSONException e) {
+
                         }
                     }
-                    catch (JSONException e) {
+                } catch (InterruptedException e) {
 
-                    }
                 }
-            } catch (InterruptedException e) {
-
             }
+
         }
-
-
     }
 
     private void setUpClusterer() {
