@@ -3,6 +3,7 @@ package us.trigg.crumble;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -83,11 +84,11 @@ public class MainActivity extends AppCompatActivity implements
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        FragmentManager fm = getFragmentManager();
-        fm.beginTransaction().replace(R.id.frag_manager_frame, new us.trigg.crumble.fragments.LoginFragment()).commit();
-
         sMapFragment = SupportMapFragment.newInstance();
         sMapFragment.getMapAsync(this);
+
+        android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
+        sFm.beginTransaction().add(R.id.map, sMapFragment).commit();
 
         // Start a fused API to get the user's current location
 
@@ -213,7 +214,9 @@ public class MainActivity extends AppCompatActivity implements
         }
         else if (id == R.id.nav_myPins) { }
         else if (id == R.id.nav_nearMe) { }
-        else if (id == R.id.nav_options) { }
+        else if (id == R.id.nav_login) {
+            fm.beginTransaction().replace(R.id.frag_manager_frame, new us.trigg.crumble.fragments.LoginFragment()).commit();
+        }
         else if (id == R.id.nav_share) { }
 
         Log.d(TAG, "explore activity finished, or drawer about to close");
