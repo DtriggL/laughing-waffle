@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/crumb_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <TextView
+        android:id="@+id/info_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_centerHorizontal="true"
+        android:paddingBottom="@dimen/crumb_short_view_padding"
+        android:textStyle="bold"
+        />
+
+    <ImageView
+        android:id="@+id/bites_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/info_title"
+        android:src="@drawable/hikingman"
+        android:paddingRight="5dp"
+        android:layout_marginRight="5dp"
+        android:paddingBottom="@dimen/crumb_short_view_padding"
+        />
+
+    <TextView
+        android:id="@+id/bites_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/bites_img"
+        android:layout_alignTop="@+id/bites_img"
+        android:paddingBottom="@dimen/crumb_short_view_padding"
+        />
+
+    <ImageView
+        android:id="@+id/rating_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/star"
+        android:layout_toRightOf="@id/bites_num"
+        android:layout_alignTop="@+id/bites_img"
+        android:paddingLeft="5dp"
+        android:layout_marginLeft="5dp"
+        android:paddingBottom="@dimen/crumb_short_view_padding"
+        />
+
+    <TextView
+        android:id="@+id/rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/rating_img"
+        android:layout_alignTop="@+id/bites_img"
+        android:paddingLeft="5dp"
+        android:layout_marginLeft="5dp"
+        android:paddingBottom="@dimen/crumb_short_view_padding"
+        />
+</RelativeLayout>

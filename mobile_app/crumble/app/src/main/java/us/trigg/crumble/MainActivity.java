@@ -14,30 +14,31 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.content.Intent;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
-
+import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+
+import us.trigg.crumble.fragments.LogbookFragment;
+import us.trigg.crumble.fragments.LoginFragment;
+import us.trigg.crumble.fragments.NoConnectionAlertFragment;
+import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
+
 import static us.trigg.crumble.WebConstants.*;
 
 public class MainActivity extends AppCompatActivity implements
@@ -46,13 +47,14 @@ public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMarkerClickListener {
+        MyFragmentDialogInterface {
 
     public static final String EXTRA_MESSAGE = "Explore Activity";
     public static final String TAG = "Main Activity";
 
     private ClusterManager<Crumb> mClusterManager;
-    //private HashMap<Marker, Crumb> markers;
+    private DefaultClusterRenderer<Crumb> mClusterRenderer;
+    private HashMap<Integer, Crumb> crumbMarkerHashMap;
 
     private GoogleMap mMap;
     protected GoogleApiClient mGoogleApiClient;
@@ -62,7 +64,14 @@ public class MainActivity extends AppCompatActivity implements
     protected boolean mAddressRequsted;
     protected String mAddressOutput;
 
+    private NoConnectionAlertFragment alert;
+
     SupportMapFragment sMapFragment;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     //-----------------------------------------------------------------------------------
     // Life-cycle Event Handlers
@@ -84,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements
         navigationView.setNavigationItemSelectedListener(this);
 
         FragmentManager fm = getFragmentManager();
-        fm.beginTransaction().replace(R.id.frag_manager_frame, new us.trigg.crumble.fragments.LoginFragment()).commit();
+        fm.beginTransaction().replace(R.id.frag_manager_frame, new LoginFragment()).commit();
 
         sMapFragment = SupportMapFragment.newInstance();
         sMapFragment.getMapAsync(this);
@@ -92,12 +101,16 @@ public class MainActivity extends AppCompatActivity implements
         // Start a fused API to get the user's current location
 
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
 
     //-----------------------------------------------------------------------------------
     // Google Map Event Handlers
     //-----------------------------------------------------------------------------------
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -115,14 +128,14 @@ public class MainActivity extends AppCompatActivity implements
 
         setUpClusterer();
 
+        // Point the map's listeners at the listeners implemented by the cluster
+        // manager.
+        mMap.setInfoWindowAdapter(mClusterManager.getMarkerManager());
+        mMap.setOnCameraChangeListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
+
         // Get all of the crumbs from the server and add them to the map
         new GetAllCrumbs().execute(null, null, null);
-    }
-
-
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        return false;
     }
 
     @Override
@@ -135,13 +148,16 @@ public class MainActivity extends AppCompatActivity implements
     // Google API Event Handlers
     //-----------------------------------------------------------------------------------
     @Override
-    public void onConnected(Bundle bundle) { }
+    public void onConnected(Bundle bundle) {
+    }
 
     @Override
-    public void onConnectionSuspended(int i) { }
+    public void onConnectionSuspended(int i) {
+    }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) { }
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+    }
 
     //-----------------------------------------------------------------------------------
     // Fused Location API event handlers
@@ -156,8 +172,7 @@ public class MainActivity extends AppCompatActivity implements
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        }
-        else {
+        } else {
             super.onBackPressed();
         }
     }
@@ -194,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements
         int id = item.getItemId();
 
         //On every menu button click, the map fragment get's hidden
-        if(sMapFragment.isAdded())
+        if (sMapFragment.isAdded())
             sFm.beginTransaction().hide(sMapFragment).commit();
 
         if (id == R.id.nav_explore) {
@@ -205,16 +220,15 @@ public class MainActivity extends AppCompatActivity implements
             else
                 sFm.beginTransaction().show(sMapFragment).commit();
 
-        }
-        else if (id == R.id.nav_logbook) {
+        } else if (id == R.id.nav_logbook) {
 
-            fm.beginTransaction().replace(R.id.frag_manager_frame, new us.trigg.crumble.fragments.LogbookFragment()).commit();
+            fm.beginTransaction().replace(R.id.frag_manager_frame, new LogbookFragment()).commit();
 
+        } else if (id == R.id.nav_myPins) {
+        } else if (id == R.id.nav_nearMe) {
+        } else if (id == R.id.nav_options) {
+        } else if (id == R.id.nav_share) {
         }
-        else if (id == R.id.nav_myPins) { }
-        else if (id == R.id.nav_nearMe) { }
-        else if (id == R.id.nav_options) { }
-        else if (id == R.id.nav_share) { }
 
         Log.d(TAG, "explore activity finished, or drawer about to close");
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -222,7 +236,15 @@ public class MainActivity extends AppCompatActivity implements
         return true;
     }
 
-
+    //-----------------------------------------------------------------------------------
+    // Alert Dialog Handlers
+    //-----------------------------------------------------------------------------------
+    @Override
+    public void doPositiveClick() {
+        // Hide the alert
+        alert.dismiss();
+        // Retry
+    }
 
     //-----------------------------------------------------------------------------------
     // Public Methods
@@ -231,8 +253,6 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "map is about to be returned");
         return mMap;
     }
-
-
 
 
     //-----------------------------------------------------------------------------------
@@ -314,14 +334,13 @@ public class MainActivity extends AppCompatActivity implements
     private void setUpClusterer() {
         // Initialize the manager with the context and the map.
         // (Activity extends context, so we can pass 'this' in the constructor.)
-        mClusterManager = new ClusterManager<Crumb>(this, getMap());
+        mClusterManager = new ClusterManager<Crumb>(this, mMap);
+        // Initialize the cluster renderer
+        mClusterRenderer = new DefaultClusterRenderer<Crumb>(this, mMap, mClusterManager);
+        mClusterManager.setRenderer(mClusterRenderer);
 
-        // Point the map's listeners at the listeners implemented by the cluster
-        // manager.
+        mClusterManager.getMarkerCollection().setOnInfoWindowAdapter(new myInfoWindowAdapter());
         mClusterManager.setOnClusterItemClickListener(new ClusterItemClickListener());
-        getMap().setOnCameraChangeListener(mClusterManager);
-        getMap().setOnMarkerClickListener(mClusterManager);
-
     }
 
 
@@ -335,8 +354,63 @@ public class MainActivity extends AppCompatActivity implements
 
         @Override
         public boolean onClusterItemClick(Crumb crumb) {
-            return false;
+            Log.v(TAG, "Cluster item " + crumb.getTitle() + " clicked.");
+            // Lookup the marker associated with this crumb
+            Marker marker = mClusterRenderer.getMarker(crumb);
+            // If the marker is gone
+            if (marker == null) {
+                Log.v(TAG, "No marker for this crumb.");
+                // Return false, and don't do anything!
+                return false;
+            }
+            // Show it's infoWindow and populate it with the crumb data
+            else {
+                // Set the data in the info window
+                Log.v(TAG, "Found a marker!");
+                marker.showInfoWindow();
+                return true;
+            }
         }
+    }
+
+    //-----------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
+    private class myInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
+
+        private final View myContents;
+
+        public myInfoWindowAdapter() {
+            myContents = getLayoutInflater().inflate(R.layout.crumb_view, null);
+        }
+        @Override
+        public View getInfoWindow(Marker marker) {
+            return null;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker) {
+            // Set the data in the inflator
+            Crumb crumb = mClusterRenderer.getClusterItem(marker);
+            if (crumb != null) {
+                // Get the views
+                TextView title = (TextView) myContents.findViewById(R.id.info_title);
+                TextView bites = (TextView) myContents.findViewById(R.id.bites_num);
+                TextView rating = (TextView) myContents.findViewById(R.id.rating);
+
+                // Set the content of the views
+                title.setText(crumb.getTitle());
+                bites.setText(Integer.toString(crumb.getTotalDiscovered()));
+                rating.setText(Float.toString(crumb.getRating()));
+
+                // DEBUG
+                Log.v(TAG, "Just showed infoWindow for crumb " + crumb.getTitle());
+            } else {
+                Log.v(TAG, "There was no crumb...");
+            }
+
+            return myContents;
+        }
+
     }
 
     //-----------------------------------------------------------------------------------
@@ -361,7 +435,7 @@ public class MainActivity extends AppCompatActivity implements
 
         /**
          * Before starting background thread Show Progress Dialog
-         * */
+         */
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -383,6 +457,12 @@ public class MainActivity extends AppCompatActivity implements
 
             } catch (JSONException e) {
                 e.printStackTrace();
+            } catch (Exception e) {
+                // There's not an internet connection
+                // Throw up a dialog that lets the user retry
+                alert = new NoConnectionAlertFragment();
+                alert.show(getFragmentManager(),"Alert Dialog");
+
             }
             return null;
         }
@@ -396,13 +476,11 @@ public class MainActivity extends AppCompatActivity implements
                     /**
                      * Call function in UI thread to update the  map
                      * */
-                        addCrumbs(mJson);
+                    addCrumbs(mJson);
                 }
             }).run();
         }
     }
-
-
 
 
     //-----------------------------------------------------------------------------------

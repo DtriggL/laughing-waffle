@@ -36,7 +36,8 @@ public class JSONParser {
     // function get json from url
     // by making HTTP POST or GET mehtod
     public JSONObject makeHttpRequest(String url, String method,
-                                      List<NameValuePair> params) {
+                                      List<NameValuePair> params)
+        throws Exception {
 
         // Making HTTP request
         try {
@@ -60,6 +61,7 @@ public class JSONParser {
                     url += "?" + paramString;
                 }
                 Log.d("JSON Parser", "Executing GET. URL is: " + url );
+
                 HttpGet httpGet = new HttpGet(url);
 
                 HttpResponse httpResponse = httpClient.execute(httpGet);
@@ -69,10 +71,12 @@ public class JSONParser {
 
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
+            throw new Exception();
         } catch (ClientProtocolException e) {
             e.printStackTrace();
+            throw new Exception();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new Exception();
         }
 
 
@@ -89,6 +93,7 @@ public class JSONParser {
             Log.v("JSON Parser", json);
         } catch (Exception e) {
             Log.e("Buffer Error", "Error converting result " + e.toString());
+            throw new Exception();
         }
 
         // try parse the string to a JSON object
@@ -96,6 +101,7 @@ public class JSONParser {
             jObj = new JSONObject(json);
         } catch (JSONException e) {
             Log.e("JSON Parser", "Error parsing data " + e.toString());
+            throw new Exception();
         }
 
         // return JSON String
