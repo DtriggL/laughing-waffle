@@ -2,6 +2,7 @@ package us.trigg.crumble;
 
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.IntentSender;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -21,6 +22,16 @@ import android.widget.Toast;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -50,29 +61,29 @@ public class MainActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
         MyFragmentDialogInterface {
 
+    // Conetants
     public static final String EXTRA_MESSAGE = "Explore Activity";
     public static final String TAG = "Main Activity";
+    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
 
     private ClusterManager<Crumb> mClusterManager;
     private DefaultClusterRenderer<Crumb> mClusterRenderer;
     private HashMap<Integer, Crumb> crumbMarkerHashMap;
 
     private GoogleMap mMap;
+
+    // Locaiton API client
     protected GoogleApiClient mGoogleApiClient;
+    // Location Request
+    protected LocationRequest mLocationRequest;
+
+
     //Location
-    protected Location mLastLocation;
-    //Addresses
-    protected boolean mAddressRequsted;
-    protected String mAddressOutput;
+    protected Location mCurrentLocation;
 
     private NoConnectionAlertFragment alert;
 
     SupportMapFragment sMapFragment;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
 
     //-----------------------------------------------------------------------------------
     // Life-cycle Event Handlers
@@ -104,8 +115,31 @@ public class MainActivity extends AppCompatActivity implements
         sFm.beginTransaction().add(R.id.map, sMapFragment).commit();
 
         // Start a fused API to get the user's current location
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
+        // Create the location request
+        createLocationRequest();
     }
 
+    @Override
+    public void onStart() {
+        // Connect to the Play API
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
 
     //-----------------------------------------------------------------------------------
     // Google Map Event Handlers
@@ -123,8 +157,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        Log.d(TAG, "on Map Ready, about to set up clusterer");
 
         setUpClusterer();
 
@@ -149,6 +181,56 @@ public class MainActivity extends AppCompatActivity implements
     //-----------------------------------------------------------------------------------
     @Override
     public void onConnected(Bundle bundle) {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest);
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient,
+                        builder.build());
+
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult result) {
+                final Status status = result.getStatus();
+                final LocationSettingsStates state = result.getLocationSettingsStates();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        // All location settings are satisfied. The client can
+                        // initialize location requests here.
+                        // Get the current location services settings
+                        startLocationUpdates();
+                        // Setup my location on the map
+                        try {
+                            mMap.setMyLocationEnabled(true);
+                        } catch (SecurityException e) {
+                            Toast.makeText(getApplicationContext(),
+                                    "Location Services not enabled.",
+                                    Toast.LENGTH_LONG).show();
+                        }
+
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied, but this can be fixed
+                        // by showing the user a dialog.
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(
+                                    MainActivity.this,
+                                    REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                            // Ignore the error.
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way
+                        // to fix the settings so we won't show the dialog.
+
+                        break;
+                }
+            }
+        });
+
+
     }
 
     @Override
@@ -158,11 +240,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
     }
-
-    //-----------------------------------------------------------------------------------
-    // Fused Location API event handlers
-    //-----------------------------------------------------------------------------------
-
 
     //-----------------------------------------------------------------------------------
     // Navigation Drawer Event Handlers
@@ -344,7 +421,28 @@ public class MainActivity extends AppCompatActivity implements
         mClusterManager.getMarkerCollection().setOnInfoWindowAdapter(new myInfoWindowAdapter());
         mClusterManager.setOnClusterItemClickListener(new ClusterItemClickListener());
     }
-
+    //-----------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
+    private void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+    //-----------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
+    private void startLocationUpdates() {
+        try {
+            LocationServices.FusedLocationApi.requestLocationUpdates(
+                    mGoogleApiClient,
+                    mLocationRequest,
+                    new MyLocationListener());
+        } catch (SecurityException e) {
+            Toast.makeText(getApplicationContext(),
+                    "Location Services not enabled.",
+                    Toast.LENGTH_LONG).show();
+        }
+    }
 
     //-----------------------------------------------------------------------------------
     // Private Classes
@@ -515,4 +613,29 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+
+    //-----------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
+    private class MyLocationListener implements LocationListener {
+
+        @Override
+        public void onLocationChanged(Location location) {
+            mCurrentLocation = location;
+            updateMap();
+        }
+
+        private void updateMap() {
+            // Check to see if the user is routed to a crumb
+                // If so, call drawRoute and update distance, bearing, and altitude. drawRoute(); updateHUD();
+                // If distance is less than required, launch the crumb display fragment.
+        }
+
+        private void drawRoute() {
+
+        }
+
+        private void updateHUD() {
+
+        }
+    }
 }
