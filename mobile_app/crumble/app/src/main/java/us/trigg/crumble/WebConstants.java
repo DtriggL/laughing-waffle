@@ -8,6 +8,8 @@ public class WebConstants {
 
     public static final String URL_ALL_CRUMBS= SERVER_ADDR + "crumb/all";
 
+    public static final String URL_ADD_CRUMB = SERVER_ADDR + "crumb/add";
+
     public static class OnlineCrumbTableContact {
         private OnlineCrumbTableContact() {}
 
