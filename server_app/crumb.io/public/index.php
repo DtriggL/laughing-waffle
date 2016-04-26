@@ -45,8 +45,12 @@ $app = new Micro($di);
 //    4. messafe
 //-------------------------------------------------------------------------------
 $app->post('/api/crumb/add', function () use ($app) {
-    // Get the raw JSON content
-    $item = $app->request->getJsonRawBody();
+    // Get the raw POST content
+    $item->title = $app->request->getPost("title");
+    $item->message = $app->request->getPost("message");
+    $item->latitude = $app->request->getPost("latitude");
+    $item->longitude = $app->request->getPost("longitude");
+    $item->creator_id = $app->request->getPost("creator_id");
 
     $phql = "INSERT INTO Crumb (creator_id, latitude, longitude, message, title) VALUES (:creator_id:, :latitude:, :longitude:, :message:, :title:)";
     // Get a collection of users that meet the criteria
@@ -65,7 +69,7 @@ $app->post('/api/crumb/add', function () use ($app) {
         // Change the HTTP status
         $response->setStatusCode(201, "Created");
 
-        //$item->crumb_id = $status->getModel()->crumb_id;
+        $item->crumb_id = $status->getModel()->crumb_id;
 
         $response->setJsonContent(
             array(
