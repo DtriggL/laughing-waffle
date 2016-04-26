@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,6 +43,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
@@ -50,6 +53,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,23 +86,40 @@ public class MainActivity extends AppCompatActivity implements
 
     private GoogleMap mMap;
 
+<<<<<<< HEAD
 
 
     // Locaiton API client
+=======
+    // Location API client
+>>>>>>> 815c8dabd5e02a371d4ca414f448005f6880c230
     protected GoogleApiClient mGoogleApiClient;
     // Location Request
     protected LocationRequest mLocationRequest;
 
-
-    //Location
+    // Location
     protected Location mCurrentLocation;
 
+    // Fragments
+    // Alert Fragment
     private NoConnectionAlertFragment alert;
-
     SupportMapFragment sMapFragment;
 
+<<<<<<< HEAD
     //fab
     private FloatingActionButton fab;
+=======
+    // UI Elements
+    // HUD
+    private TextView heading;
+    private TextView altitude;
+    private TextView distance;
+
+    // Route Variables
+    Crumb toCrumb;
+    boolean routed;
+    Polyline routeLine;
+>>>>>>> 815c8dabd5e02a371d4ca414f448005f6880c230
 
     //-----------------------------------------------------------------------------------
     // Life-cycle Event Handlers
@@ -116,9 +137,12 @@ public class MainActivity extends AppCompatActivity implements
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        // Setup the view elements
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
+        heading = (TextView) findViewById(R.id.heading);
+        altitude = (TextView) findViewById(R.id.altitude);
+        distance = (TextView) findViewById(R.id.distance);
 
         FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction().replace(R.id.frag_manager_frame, new LoginFragment()).commit();
@@ -128,6 +152,7 @@ public class MainActivity extends AppCompatActivity implements
 
         android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
         sFm.beginTransaction().add(R.id.map, sMapFragment).commit();
+
 
         // Start a fused API to get the user's current location
         // Create an instance of GoogleAPIClient.
@@ -142,6 +167,7 @@ public class MainActivity extends AppCompatActivity implements
         // Create the location request
         createLocationRequest();
 
+<<<<<<< HEAD
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,6 +220,13 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
         fab.show();
+=======
+        // Initialize route attributes
+        toCrumb = null;
+        routed = false;
+        hideHUD();
+        routeLine = null;
+>>>>>>> 815c8dabd5e02a371d4ca414f448005f6880c230
     }
 
     @Override
@@ -225,6 +258,9 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        // Set up the map padding
+        mMap.setPadding(0, 60, 0, 0);
 
         setUpClusterer();
 
@@ -423,6 +459,64 @@ public class MainActivity extends AppCompatActivity implements
 
     //-----------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------
+    private void hideHUD() {
+        TextView headingTitle = (TextView) findViewById(R.id.heading_title);
+        TextView altitudeTitle = (TextView) findViewById(R.id.altitude_title);
+        TextView distanceTitle = (TextView) findViewById(R.id.distance_title);
+        headingTitle.setVisibility(View.INVISIBLE);
+        heading.setVisibility(View.INVISIBLE);
+        altitudeTitle.setVisibility(View.INVISIBLE);
+        altitude.setVisibility(View.INVISIBLE);
+        distanceTitle.setVisibility(View.INVISIBLE);
+        distance.setVisibility(View.INVISIBLE);
+
+    }
+
+    //-----------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
+    private void showHUD() {
+        TextView headingTitle = (TextView) findViewById(R.id.heading_title);
+        TextView altitudeTitle = (TextView) findViewById(R.id.altitude_title);
+        TextView distanceTitle = (TextView) findViewById(R.id.distance_title);
+        headingTitle.setVisibility(View.VISIBLE);
+        heading.setVisibility(View.VISIBLE);
+        altitudeTitle.setVisibility(View.VISIBLE);
+        altitude.setVisibility(View.VISIBLE);
+        distanceTitle.setVisibility(View.VISIBLE);
+        distance.setVisibility(View.VISIBLE);
+    }
+
+    //-----------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
+    private void routeTo(Crumb crumb) {
+        toCrumb = crumb;
+        // TODO: Download additional crumb details and save them to the crumb
+        routed = true;
+        // Turn on the HUD
+        showHUD();
+        // Draw the a PolyLine to the crumb
+        LatLng userPosition = new LatLng(
+                mCurrentLocation.getLatitude(),
+                mCurrentLocation.getLatitude()
+        );
+        if (routeLine != null) {
+            routeLine = this.mMap.addPolyline(new PolylineOptions()
+                    .add(toCrumb.getPosition(), userPosition)
+                    .color(R.color.route_purple)
+            );
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
+    private void endRoute() {
+        routed = false;
+        toCrumb = null;
+        routeLine.remove();
+    }
+
+    //-----------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
     private void addCrumbs(JSONObject json) {
         if (json != null) {
             Log.d(TAG, "In add crumbs.");
@@ -492,7 +586,8 @@ public class MainActivity extends AppCompatActivity implements
 
         }
     }
-
+    //-----------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
     private void setUpClusterer() {
         // Initialize the manager with the context and the map.
         // (Activity extends context, so we can pass 'this' in the constructor.)
@@ -665,38 +760,6 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-
-    //-----------------------------------------------------------------------------------
-    //-----------------------------------------------------------------------------------
-    private class MyInfoWindow implements GoogleMap.OnInfoWindowClickListener,
-            GoogleMap.InfoWindowAdapter {
-        private View myInfoWindowView;
-
-        public MyInfoWindow() {
-            // Add your custom layout here
-            //myInfoWindowView = getLayoutInflater().inflate(R.layout.my_custom_info_layout, null);
-        }
-
-        @Override
-        public void onInfoWindowClick(Marker marker) {
-            Toast.makeText(getApplicationContext(), "Info window clicked",
-                    Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public View getInfoContents(Marker marker) {
-            // Set the content of the view, then return the view.
-            // Lookup the crumb in the marker hash table.
-            return null;
-        }
-
-        @Override
-        public View getInfoWindow(Marker marker) {
-            return null;
-        }
-    }
-
-
     //-----------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------
     private class MyLocationListener implements LocationListener {
@@ -708,17 +771,36 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         private void updateMap() {
-            // Check to see if the user is routed to a crumb
+            if (routed) {
                 // If so, call drawRoute and update distance, bearing, and altitude. drawRoute(); updateHUD();
                 // If distance is less than required, launch the crumb display fragment.
+                updateHUD();
+                drawRoute();
+            }
         }
 
         private void drawRoute() {
-
+            // Draw a line on the map from the user's current position to the position of
+            // toCrumb
+            LatLng userPosition = new LatLng(
+                    mCurrentLocation.getLatitude(),
+                    mCurrentLocation.getLatitude()
+            );
+            ArrayList<LatLng> points = new ArrayList<LatLng>();
+            points.add(toCrumb.getPosition());
+            points.add(userPosition);
+            if (routeLine != null) {
+                // Set the new points of the polyLine
+                routeLine.setPoints(points);
+            }
         }
 
         private void updateHUD() {
-
+            //altitude.setText(Double.toString(mCurrentLocation.getAltitude()));
+            String alt_str = String.format("%.2d", mCurrentLocation.getAltitude());
+            altitude.setText(alt_str);
+            heading.setText(Float.toString(mCurrentLocation.getBearing()));
+            distance.setText(Float.toString(mCurrentLocation.getSpeed()));
         }
     }
 

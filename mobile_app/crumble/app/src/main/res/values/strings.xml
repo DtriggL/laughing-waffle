@@ -28,4 +28,9 @@
 
     <string name="no_connection">No Internet Connection</string>
 
+    <!-- Strings to be used for the map HUD -->
+    <string name="heading">Heading</string>
+    <string name="altitude">Altitude (MSL)</string>
+    <string name="distance">Distance</string>
+
 </resources>
