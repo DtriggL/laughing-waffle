@@ -1,26 +1,31 @@
 package us.trigg.crumble;
 
-import android.app.FragmentManager;
+import android.app.AlertDialog;
+import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.location.Location;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.google.android.gms.appindexing.AppIndex;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -43,6 +48,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,13 +57,15 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import us.trigg.crumble.fragments.LogbookFragment;
 import us.trigg.crumble.fragments.LoginFragment;
 import us.trigg.crumble.fragments.NoConnectionAlertFragment;
+import us.trigg.crumble.fragments.PinsFragment;
 import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
 
-import static us.trigg.crumble.WebConstants.*;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact;
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
@@ -66,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
         MyFragmentDialogInterface {
 
-    // Conetants
+    // Constants
     public static final String EXTRA_MESSAGE = "Explore Activity";
     public static final String TAG = "Main Activity";
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
@@ -77,7 +86,8 @@ public class MainActivity extends AppCompatActivity implements
 
     private GoogleMap mMap;
 
-    // Location API client
+    // Locaiton API client
+
     protected GoogleApiClient mGoogleApiClient;
     // Location Request
     protected LocationRequest mLocationRequest;
@@ -90,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements
     private NoConnectionAlertFragment alert;
     SupportMapFragment sMapFragment;
 
+
     // UI Elements
     // HUD
     private TextView heading;
@@ -100,6 +111,9 @@ public class MainActivity extends AppCompatActivity implements
     Crumb toCrumb;
     boolean routed;
     Polyline routeLine;
+
+    //fab
+    private FloatingActionButton fab;
 
     //-----------------------------------------------------------------------------------
     // Life-cycle Event Handlers
@@ -124,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements
         altitude = (TextView) findViewById(R.id.altitude);
         distance = (TextView) findViewById(R.id.distance);
 
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction().replace(R.id.frag_manager_frame, new LoginFragment()).commit();
 
         sMapFragment = SupportMapFragment.newInstance();
@@ -152,6 +166,59 @@ public class MainActivity extends AppCompatActivity implements
         routed = false;
         hideHUD();
         routeLine = null;
+
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+
+                LinearLayout layout = new LinearLayout(MainActivity.this);
+                layout.setOrientation(LinearLayout.VERTICAL);
+
+                final EditText titleBox = new EditText(MainActivity.this);
+                titleBox.setHint("Crumb Title");
+                layout.addView(titleBox);
+
+                final EditText contentBox = new EditText(MainActivity.this);
+                contentBox.setHint("Crumb Message");
+                layout.addView(contentBox);
+
+                alert.setTitle("Add Crumb");
+                //alert.setMessage("Message");
+
+                alert.setView(layout);
+
+                alert.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        //insert crumb with title=stringTitle and message=stringContent
+                        if(mCurrentLocation != null) {
+                            String stringTitle = titleBox.getText().toString();
+                            String stringContent = contentBox.getText().toString();
+                            String lat = Double.toString(mCurrentLocation.getLatitude());
+                            String lng = Double.toString(mCurrentLocation.getLongitude());
+
+                            new CreateNewCrumb().execute(stringTitle, stringContent, lat, lng);
+                        }
+                        else{
+                            Log.d(TAG, "Location null in FAB onClick");
+                            Toast.makeText(getParent(), "No location determined. Make sure location service is enabled", Toast.LENGTH_LONG).show();
+                        }
+
+                    }
+                });
+
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Canceled.
+                    }
+                });
+
+                alert.show();
+            }
+        });
+        fab.show();
     }
 
     @Override
@@ -271,6 +338,17 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     //-----------------------------------------------------------------------------------
+    // Floating Action Button Visibility
+    //-----------------------------------------------------------------------------------
+    public void showFloatingActionButton() {
+        fab.show();
+    }
+
+    public void hideFloatingActionButton() {
+        fab.hide();
+    }
+
+    //-----------------------------------------------------------------------------------
     // Navigation Drawer Event Handlers
     //-----------------------------------------------------------------------------------
     @Override
@@ -309,7 +387,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
 
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
 
         int id = item.getItemId();
@@ -319,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements
             sFm.beginTransaction().hide(sMapFragment).commit();
 
         if (id == R.id.nav_explore) {
-
+            showFloatingActionButton();
             //The first time, map fragment needs to be added. After that, it just needs to be shown.
             if (!sMapFragment.isAdded())
                 sFm.beginTransaction().add(R.id.map, sMapFragment).commit();
@@ -327,13 +405,17 @@ public class MainActivity extends AppCompatActivity implements
                 sFm.beginTransaction().show(sMapFragment).commit();
 
         } else if (id == R.id.nav_logbook) {
-
+            hideFloatingActionButton();
             fm.beginTransaction().replace(R.id.frag_manager_frame, new LogbookFragment()).commit();
         }
 
-        else if (id == R.id.nav_myPins) { }
+        else if (id == R.id.nav_myPins) {
+            hideFloatingActionButton();
+            fm.beginTransaction().replace(R.id.frag_manager_frame, new PinsFragment()).commit();
+        }
         else if (id == R.id.nav_nearMe) { }
         else if (id == R.id.nav_login) {
+            hideFloatingActionButton();
             fm.beginTransaction().replace(R.id.frag_manager_frame, new us.trigg.crumble.fragments.LoginFragment()).commit();
         }
         else if (id == R.id.nav_share) { }
@@ -711,6 +793,87 @@ public class MainActivity extends AppCompatActivity implements
             altitude.setText(alt_str);
             heading.setText(Float.toString(mCurrentLocation.getBearing()));
             distance.setText(Float.toString(mCurrentLocation.getSpeed()));
+        }
+    }
+
+    //----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
+    private class CreateNewCrumb extends AsyncTask<String, String, String> {
+        private ProgressDialog pDialog;
+        private JSONParser jsonParser = new JSONParser();
+        public static final String TAG_SUCCESS = "success";
+
+
+        /**
+         * Before starting background thread Show Progress Dialog
+         */
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(MainActivity.this);
+            pDialog.setMessage("Creating Crumb...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(true);
+            pDialog.show();
+        }
+
+        /**
+         * Creating crumb
+         */
+        protected String doInBackground(String... args) {
+            String title = args[0];
+            String message = args[1];
+            String lat = args[2];
+            String lng = args[3];
+
+            Log.d(TAG, title);
+            Log.d(TAG, message);
+            Log.d(TAG, lat);
+            Log.d(TAG, lng);
+
+            //building Parameters
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("creator_id","1"));
+            params.add(new BasicNameValuePair("title", title));
+            params.add(new BasicNameValuePair("latitude", lat));
+            params.add(new BasicNameValuePair("longitude", lng));
+            params.add(new BasicNameValuePair("message", message));
+
+            JSONObject json = null;
+            try {
+                json = jsonParser.makeHttpRequest(WebConstants.URL_ADD_CRUMB,
+                        "POST", params);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // check log cat for response
+            Log.d("Create Response", json.toString());
+
+            // check for success tag
+                String success = json.optString(TAG_SUCCESS);
+
+                if (success != null) {
+                    // successfully created product
+                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(i);
+
+                    // closing this screen
+                    finish();
+                } else {
+                    // failed to create product
+                }
+
+
+            return null;
+        }
+
+        /**
+         * After completing background task dismiss the progress dialog
+         **/
+        protected void onPostExecute(String file_url) {
+            // dismiss the dialog once done
+            pDialog.dismiss();
         }
     }
 }
