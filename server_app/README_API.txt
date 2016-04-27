@@ -45,7 +45,7 @@ Crumble-api
 // Description: Add a crumb to the database
 // URL: http://uaf132701.ddns.uark.edu/api/crumb/add
 // Method: POST
-// Payload: JSON Crumb Object: Fields are:
+// Payload: Raw POST Request, fields are:
 //    1. creator_id
 //    2. title
 //    2. latitude
@@ -88,5 +88,22 @@ Crumble-api
 //    if not success:
 //        {
 //         “status”:”ERROR”
+//        }
+//-------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------
+// Function Name: findCrumb
+// Description: Increments the "total_discovered" field of the specified crumb.
+// URL: http://uaf132701.ddns.uark.edu/api/crumb/find/<id>
+// Method: GET
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status” : ”FOUND”,
+//         “data”   : “{crumb object}”
+//        }
+//    if not success:
+//        {
+//         “status” : ”NOT-FOUND”
 //        }
 //-------------------------------------------------------------------------------

@@ -339,6 +339,80 @@ $app->get('/api/crumb/all', function () use ($app) {
     return $response;
 });
 
+//-------------------------------------------------------------------------------
+// Function Name: findCrumb
+// Description: Increments the "total_discovered" field of the specified crumb.
+// URL: http://uaf132701.ddns.uark.edu/api/crumb/find/<id>
+// Method: GET
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status” : ”FOUND”,
+//         “data”   : “{crumb object}”
+//        }
+//    if not success:
+//        {
+//         “status” : ”NOT-FOUND”
+//        }
+//-------------------------------------------------------------------------------
+$app->get('/api/crumb/find/{id:[0-9]+}', function ($id) use ($app) {
+	$phql = "SELECT * FROM Crumb WHERE crumb_id = :id:";
+
+	//Get the list that matches the given list id
+	$crumbs = $app->modelsManager->executeQuery($phql, array(
+			'id' => $id
+	));
+    
+	//Create a response to send back to the client
+	$response = new Response();
+
+	if($crumbs == false) {
+	    $response->setStatusCode(409, 'Conflict');
+        $response->setJsonContent(
+           array(
+               'status'   => 'ERROR',
+               'messages' => $errors
+           )
+        );
+	}
+	else {
+        // We found one!
+        $crumb = $crumbs->getFirst();
+        // So add one to it's total_discovered field
+        $crumb->total_discovered = $crumb->total_discovered + 1;
+        // Update the value in the database
+        $phql = "UPDATE Crumb SET total_discovered = :bites: WHERE crumb_id = :id:";
+        $status = $app->modelsManager->executeQuery($phql, 
+            array(
+                'id' => $id,
+                'bites' => $crumb->total_discovered
+	        )
+        );
+        
+        if ($status->success() == true) {
+            // Change the HTTP status
+            $response->setStatusCode(201, "Created");
+
+            $response->setJsonContent(
+                array(
+                    'status' => 'OK',
+                    'data'   => $crumb
+                )
+            );
+        } else {
+            $response->setStatusCode(409, 'Conflict');
+            $response->setJsonContent(
+	           array(
+	               'status'   => 'ERROR',
+                   'messages' => $errors
+               )
+	       );
+        }
+    }
+
+    return $response;
+});
+
 
 
 /* Handle a request when the file/function they requested is not 

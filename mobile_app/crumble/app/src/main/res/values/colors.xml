@@ -7,4 +7,6 @@
     <color name="colorOrange">#FFA85A</color>
     <color name="colorGreen">#007200</color>
     <color name="colorDarkGreen">#004F00</color>
+    <color name="white">#FFFFFF</color>
+    <color name="route_purple">#CC33FF</color>
 </resources>
