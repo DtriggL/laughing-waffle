@@ -1,6 +1,7 @@
 package us.trigg.crumble;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
@@ -47,6 +48,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
@@ -66,8 +68,11 @@ import us.trigg.crumble.fragments.LoginFragment;
 import us.trigg.crumble.fragments.NoConnectionAlertFragment;
 import us.trigg.crumble.fragments.PinsFragment;
 import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
+import us.trigg.crumble.interfaces.WebComHandler;
 
 import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact;
+import static us.trigg.crumble.WebConstants.PAYLOAD_TAG;
+import static us.trigg.crumble.WebConstants.STATUS_TAG;
 
 // TODO:
 // 1. (DONE) Fix server code to send right information
@@ -75,7 +80,7 @@ import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact;
 // 3. Be able to stop a route
 // 4. (DONE) Don't want to be able to route to multiple crumbs
 // 5. Download crumb content when routed to it
-// 6. Don't want crumb that you're routed to to be clustered
+// 6. (DONE) Don't want crumb that you're routed to to be clustered
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
@@ -83,7 +88,8 @@ public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleMap.OnMyLocationButtonClickListener,
-        MyFragmentDialogInterface {
+        MyFragmentDialogInterface,
+        WebComHandler {
 
     // Constants
     public static final String EXTRA_MESSAGE = "Explore Activity";
@@ -94,8 +100,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final float DISTANCE_REQUIRED = 10; // Distance in meters
 
     private ClusterManager<Crumb> mClusterManager;
-    private DefaultClusterRenderer<Crumb> mClusterRenderer;
-    private HashMap<Integer, Crumb> crumbMarkerHashMap;
+    private MyClusterRender mClusterRenderer;
 
     private GoogleMap mMap;
 
@@ -113,6 +118,8 @@ public class MainActivity extends AppCompatActivity implements
     private NoConnectionAlertFragment alert;
     SupportMapFragment sMapFragment;
 
+    // Web Communications Module
+    WebCom myWebCom;
 
     // UI Elements
     // HUD
@@ -157,6 +164,9 @@ public class MainActivity extends AppCompatActivity implements
 
         sMapFragment = SupportMapFragment.newInstance();
         sMapFragment.getMapAsync(this);
+
+        // Web Communications Module Initialization
+        myWebCom = new WebCom(this, this);
 
         android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
         sFm.beginTransaction().add(R.id.map, sMapFragment).commit();
@@ -242,7 +252,8 @@ public class MainActivity extends AppCompatActivity implements
         mMap.setOnMapClickListener(new MyOnMapClickListener());
 
         // Get all of the crumbs from the server and add them to the map
-        new GetAllCrumbs().execute(null, null, null);
+        //new GetAllCrumbs().execute(null, null, null);
+        myWebCom.getAllCrumbsBrief();
     }
 
     @Override
@@ -314,6 +325,19 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
+    }
+
+    //-----------------------------------------------------------------------------------
+    // WebComHandler Event Handlers
+    //-----------------------------------------------------------------------------------
+    @Override
+    public void onGetOwnedCrumbs(JSONObject json) {
+
+    }
+
+    @Override
+    public void onGetAllCrumbs(JSONObject json) {
+        addCrumbs(json);
     }
 
     //-----------------------------------------------------------------------------------
@@ -568,6 +592,11 @@ public class MainActivity extends AppCompatActivity implements
             routeLine.remove();
         }
         toCrumb = crumb;
+        // Set the crumb so that it will not be clustered
+        Marker marker = mClusterRenderer.getMarker(toCrumb);
+        if (marker != null) {
+
+        }
         // TODO: Download additional crumb details and save them to the crumb
         routed = true;
         // Turn on the HUD
@@ -607,9 +636,9 @@ public class MainActivity extends AppCompatActivity implements
                         // 2. Add all of the information from the data JSON object to the map as crumbs
                         try {
                             // Check to see if the request was a success
-                            if (json.getString(GetAllCrumbs.TAG_SUCCESS).compareTo("FOUND") == 0) {
+                            if (json.getString(STATUS_TAG).compareTo("FOUND") == 0) {
                                 // Loop through the results in data[] to add the crumbs
-                                JSONArray data = json.getJSONArray(GetAllCrumbs.TAG_PAYLOAD);
+                                JSONArray data = json.getJSONArray(PAYLOAD_TAG);
                                 Log.d(TAG, "Data length is: " + data.length());
                                 for (int i = 0; i < data.length(); i++) {
                                     // Got the object
@@ -673,7 +702,7 @@ public class MainActivity extends AppCompatActivity implements
         // (Activity extends context, so we can pass 'this' in the constructor.)
         mClusterManager = new ClusterManager<Crumb>(this, mMap);
         // Initialize the cluster renderer
-        mClusterRenderer = new DefaultClusterRenderer<Crumb>(this, mMap, mClusterManager);
+        mClusterRenderer = new MyClusterRender(this, mMap, mClusterManager);
         mClusterManager.setRenderer(mClusterRenderer);
 
         mClusterManager.getMarkerCollection().setOnInfoWindowAdapter(new myInfoWindowAdapter());
@@ -776,75 +805,6 @@ public class MainActivity extends AppCompatActivity implements
             return myContents;
         }
 
-    }
-
-    //-----------------------------------------------------------------------------------
-    //-----------------------------------------------------------------------------------
-    private class GetAllCrumbs extends AsyncTask<String, String, String> {
-
-        // Progress Dialog
-        private ProgressDialog pDialog;
-
-        // JSON parser class
-        private JSONParser jsonParser = new JSONParser();
-
-        // JSON Object
-        private JSONObject mJson;
-
-        // Status flag
-        private String status;
-
-        // Status results
-        public static final String TAG_SUCCESS = "status";
-        public static final String TAG_PAYLOAD = "data";
-
-        /**
-         * Before starting background thread Show Progress Dialog
-         */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_SPINNER);
-            pDialog.setMessage("Retreiving crumbs...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-            try {
-                // Get crumbs by making HTTP request
-                mJson = jsonParser.makeHttpRequest(
-                        WebConstants.URL_ALL_CRUMBS, "GET", null);
-                // json success tag
-                status = mJson.getString(TAG_SUCCESS);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                // There's not an internet connection
-                // Throw up a dialog that lets the user retry
-                alert = new NoConnectionAlertFragment();
-                alert.show(getFragmentManager(),"Alert Dialog");
-
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String file_url) {
-            // dismiss the dialog once product deleted
-            pDialog.dismiss();
-            (new Runnable() {
-                public void run() {
-                    /**
-                     * Call function in UI thread to update the  map
-                     * */
-                    addCrumbs(mJson);
-                }
-            }).run();
-        }
     }
 
     //-----------------------------------------------------------------------------------
@@ -987,6 +947,27 @@ public class MainActivity extends AppCompatActivity implements
         public void onMapClick(LatLng latLng) {
             // Set the function of the floating action button to be add crumb
             setFloatingActionButtonFunction(FAB_ADD);
+        }
+    }
+
+    //----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
+    private class MyClusterRender extends DefaultClusterRenderer<Crumb> {
+
+        public static final int MIN_CLUSTER_SIZE = 4;
+
+        public MyClusterRender(Context context, GoogleMap map, ClusterManager<Crumb> clusterManager) {
+            super(context, map, clusterManager);
+        }
+
+        @Override
+        protected boolean shouldRenderAsCluster(Cluster<Crumb> cluster) {
+            // If it contains the toCrumb, don't render as a cluster
+            if ((cluster.getItems().contains(toCrumb)) && routed) {
+                return false;
+            } else {
+                return cluster.getSize() > MIN_CLUSTER_SIZE;
+            }
         }
     }
 
