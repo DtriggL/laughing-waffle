@@ -107,3 +107,10 @@ Crumble-api
 //         “status” : ”NOT-FOUND”
 //        }
 //-------------------------------------------------------------------------------
+
+// Get all crumbs created by certain user_id
+
+// Get all logbook items for a certain user_id
+
+// Get all crumbs discovered by user_id
+

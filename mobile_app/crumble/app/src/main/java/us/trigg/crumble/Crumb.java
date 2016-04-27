@@ -17,13 +17,13 @@ public class Crumb implements ClusterItem {
     //-----------------------------------------------------------------
     private int crumb_id;
     private String title;
-    private int totalDiscovered;          // Number of people who found the crumb
+    private int totalDiscovered;   // Number of people who found the crumb
     private String latitude;
     private String longitude;
     private String message;        // The message attached to the crumb
-    private Date creation_date;  // The date that the note was written
+    private Date creation_date;    // The date that the note was written
     private float rating; // Average rating for the crumb
-    private int ratings; // Number of ratings left for a crumb
+    private int ratings;  // Number of ratings left for a crumb
     private int creatorId;
 
 
