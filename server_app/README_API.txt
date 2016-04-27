@@ -114,3 +114,5 @@ Crumble-api
 
 // Get all crumbs discovered by user_id
 
+// Insert into logbook based on user_id
+
