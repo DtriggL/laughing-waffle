@@ -108,7 +108,28 @@ Crumble-api
 //        }
 //-------------------------------------------------------------------------------
 
-// Get all crumbs created by certain user_id
+//-------------------------------------------------------------------------------
+// Function Name: getUserCreatedCrumbs
+// Description: Get all of the crumbs, and their contents, that are created by
+//              a specified user (user_id).
+// URL: http://uaf132701.ddns.uark.edu/api/user/get/createdCrumbs
+// Method: GET
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”FOUND”,
+//         “data”: “{crumb objects}”
+//        }
+//    if not success:
+//        {
+//         “status”:”NOT-FOUND”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 200 (Success)
+//  User Not Found: 404 (Not Found)
+//   
+//-------------------------------------------------------------------------------
 
 // Get all logbook items for a certain user_id
 

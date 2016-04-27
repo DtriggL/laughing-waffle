@@ -70,11 +70,12 @@ import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
 import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact;
 
 // TODO:
-// 1. Fix server code to send right information
+// 1. (DONE) Fix server code to send right information
 // 2. Update the HUD correctly
 // 3. Be able to stop a route
-// 4. Don't want to be able to route to multiple crumbs
+// 4. (DONE) Don't want to be able to route to multiple crumbs
 // 5. Download crumb content when routed to it
+// 6. Don't want crumb that you're routed to to be clustered
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
@@ -90,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final int FAB_GO = 1;
     public static final int FAB_ADD = 0;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+    public static final float DISTANCE_REQUIRED = 10; // Distance in meters
 
     private ClusterManager<Crumb> mClusterManager;
     private DefaultClusterRenderer<Crumb> mClusterRenderer;
@@ -514,6 +516,16 @@ public class MainActivity extends AppCompatActivity implements
 
     //-----------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------
+    private float getDistanceToCrumb(Location location, Crumb crumb) {
+        Location crumbLocation = new Location("");
+        LatLng crumbPosition = crumb.getPosition();
+        crumbLocation.setLatitude(crumbPosition.latitude);
+        crumbLocation.setLongitude(crumbPosition.longitude);
+        return location.distanceTo(crumbLocation);
+    }
+
+    //-----------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
     private void setupFAB() {
         fab = (FloatingActionButton) findViewById(R.id.fab);
         setFloatingActionButtonFunction(FAB_ADD);
@@ -551,6 +563,10 @@ public class MainActivity extends AppCompatActivity implements
     //-----------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------
     private void routeTo(Crumb crumb) {
+        // Check to see if we were already routed and end it
+        if ((routed) && (routeLine != null)) {
+            routeLine.remove();
+        }
         toCrumb = crumb;
         // TODO: Download additional crumb details and save them to the crumb
         routed = true;
@@ -605,6 +621,9 @@ public class MainActivity extends AppCompatActivity implements
                                     crumb.setTitle(mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_TITLE));
                                     String lat = mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_LATITUDE);
                                     String longi = mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_LONGITUDE);
+                                    crumb.setCrumb_id(mJSONCrumb.getInt(OnlineCrumbTableContact.COLUMN_CRUMB_ID));
+                                    crumb.setTotalDiscovered(mJSONCrumb.getInt(OnlineCrumbTableContact.COLUMN_TOTAL_DISCOVERED));
+                                    crumb.setRating(Float.parseFloat(mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_RATING)));
                                     // We will set the location of the crumb later on after we determine that these values are valid
 
                                     //DEBUG
@@ -845,9 +864,16 @@ public class MainActivity extends AppCompatActivity implements
                 // If distance is less than required, launch the crumb display fragment.
                 updateHUD();
                 drawRoute();
+                checkFound();
             }
         }
 
+        private void checkFound() {
+            if (getDistanceToCrumb(mCurrentLocation, toCrumb) < DISTANCE_REQUIRED){
+                // Mark the crumb as found online
+                // Display the activity
+            }
+        }
         private void drawRoute() {
             // Draw a line on the map from the user's current position to the position of
             // toCrumb

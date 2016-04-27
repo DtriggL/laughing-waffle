@@ -64,6 +64,12 @@ public class Crumb implements ClusterItem {
     public void setCrumb_id(int id) {
         crumb_id = id;
     }
+    public void setTotalDiscovered(int td) {
+        totalDiscovered = td;
+    }
+    public void setRating(float r) {
+        rating = r;
+    }
 
     //-----------------------------------------------------------------
     // Misc. Public Methods
