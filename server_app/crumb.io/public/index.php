@@ -325,7 +325,9 @@ $app->get('/api/crumb/all', function () use ($app) {
                    'crumb_id' => $crumb->crumb_id,
                    'latitude' => $crumb->latitude,
                    'longitude' => $crumb->longitude,
-                   'title' => $crumb->title
+                   'title' => $crumb->title,
+                   'total_discovered' => $crumb->total_discovered,
+                   'rating' => $crumb->rating
                ); 
         }
         $response->setJsonContent(
@@ -413,6 +415,71 @@ $app->get('/api/crumb/find/{id:[0-9]+}', function ($id) use ($app) {
     return $response;
 });
 
+//-------------------------------------------------------------------------------
+// Function Name: getUserCreatedCrumbs
+// Description: Get all of the crumbs, and their contents, that are created by
+//              a specified user (user_id).
+// URL: http://uaf132701.ddns.uark.edu/api/user/get/createdCrumbs
+// Method: GET
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”FOUND”,
+//         “data”: “{crumb objects}”
+//        }
+//    if not success:
+//        {
+//         “status”:”NOT-FOUND”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 200 (Success)
+//  User Not Found: 404 (Not Found)
+//   
+//-------------------------------------------------------------------------------
+$app->get('/api/user/get/createdCrumbs/{id:[0-9]+}', function ($id) use ($app) {
+	$phql = "SELECT * FROM Crumb WHERE creator_id = :id:";
+
+	//Get the list that matches the given list id
+	$crumbs = $app->modelsManager->executeQuery($phql, array(
+			'id' => $id
+	));
+
+	//Create a response to send back to the client
+	$response = new Response();
+
+	if($crumbs == false) {
+        $response->setStatusCode(404, "Not Found");
+	    $response->setJsonContent(
+	    array(
+	        'status' => 'NOT-FOUND')
+	    );
+	}
+	else {
+        /* Here is where we would loop through the results and build
+           the JSON objects*/
+        $data = array();
+        foreach ($crumbs as $crumb) {
+               $data[] = array(
+                   'crumb_id' => $crumb->crumb_id,
+                   'latitude' => $crumb->latitude,
+                   'longitude' => $crumb->longitude,
+                   'title' => $crumb->title,
+                   'total_discovered' => $crumb->total_discovered,
+                   'rating' => $crumb->rating
+               ); 
+        }
+        $response->setStatusCode(200, "Success");
+        $response->setJsonContent(
+            array(
+	            'status' => 'FOUND',
+	            'data' => $data
+            )
+        );
+    }
+
+    return $response;
+});
 
 
 /* Handle a request when the file/function they requested is not 
