@@ -93,18 +93,19 @@ Crumble-api
 
 //-------------------------------------------------------------------------------
 // Function Name: findCrumb
-// Description: Increments the "total_discovered" field of the specified crumb.
-// URL: http://uaf132701.ddns.uark.edu/api/crumb/find/<id>
+// Description: Increments the "total_discovered" field of the specified crumb
+//      and inserts a row in the Discovered table for the specified user_id
+// URL: http://uaf132701.ddns.uark.edu/api/crumb/find/<crumb_id>/<user_id>
 // Method: GET
 // Returns: JSON Object:
 //    if success:
 //        {
-//         “status” : ”FOUND”,
+//         “status” : ”OK”/"ALREADY-FOUND",
 //         “data”   : “{crumb object}”
 //        }
 //    if not success:
 //        {
-//         “status” : ”NOT-FOUND”
+//         “status” : ”ERROR"
 //        }
 //-------------------------------------------------------------------------------
 
@@ -131,9 +132,30 @@ Crumble-api
 //   
 //-------------------------------------------------------------------------------
 
-// Get all logbook items for a certain user_id
+//-------------------------------------------------------------------------------
+// Function Name: getUserDiscoveredCrumbs
+// Description: Get all of the crumbs, and their contents, that have been
+//              discovered by a certain user.
+// URL: http://uaf132701.ddns.uark.edu/api/user/get/discoveredCrumbs
+// Method: GET
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”FOUND”,
+//         “data”: “{crumb objects}”
+//        }
+//    if not success:
+//        {
+//         “status”:”NOT-FOUND”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 200 (Success)
+//  No Cumbs Found: 404 (Not Found)
+//   
+//-------------------------------------------------------------------------------
 
-// Get all crumbs discovered by user_id
+// Get all logbook items for a certain user_id
 
 // Insert into logbook based on user_id
 

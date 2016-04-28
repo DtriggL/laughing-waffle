@@ -343,32 +343,102 @@ $app->get('/api/crumb/all', function () use ($app) {
 
 //-------------------------------------------------------------------------------
 // Function Name: findCrumb
-// Description: Increments the "total_discovered" field of the specified crumb.
-// URL: http://uaf132701.ddns.uark.edu/api/crumb/find/<id>
+// Description: Increments the "total_discovered" field of the specified crumb
+//      and inserts a row in the Discovered table for the specified user_id
+// URL: http://uaf132701.ddns.uark.edu/api/crumb/find/<crumb_id>/<user_id>
 // Method: GET
 // Returns: JSON Object:
 //    if success:
 //        {
-//         “status” : ”FOUND”,
+//         “status” : ”OK”/"ALREADY-FOUND",
 //         “data”   : “{crumb object}”
 //        }
 //    if not success:
 //        {
-//         “status” : ”NOT-FOUND”
+//         “status” : ”ERROR"
 //        }
 //-------------------------------------------------------------------------------
-$app->get('/api/crumb/find/{id:[0-9]+}', function ($id) use ($app) {
-	$phql = "SELECT * FROM Crumb WHERE crumb_id = :id:";
-
-	//Get the list that matches the given list id
-	$crumbs = $app->modelsManager->executeQuery($phql, array(
-			'id' => $id
-	));
-    
-	//Create a response to send back to the client
+$app->get('/api/crumb/find/{id:[0-9]+}/{u_id:[0-9]+}', function ($id, $u_id) use ($app) {
+    //Create a response to send back to the client
 	$response = new Response();
+    
+    $result = true;
+    $alreadyFound = false;
+    $crumb = null;
 
-	if($crumbs == false) {
+    // Check to see if the user has already found this one
+    $phql = "SELECT * FROM Discovered WHERE u_id = :user_id: AND c_id = :crumb_id:";
+    $status = $app->modelsManager->executeQuery($phql, array(
+        'user_id' => $u_id,
+        'crumb_id' => $id   
+	));
+    if ($status->getFirst() == false) {
+        // Leave $result as true
+        // There was not an entry already in the table
+        // Leave $alreadyFound as false
+    } else {
+        // There was already an entry in the table
+        $alreadyFound = true;
+    }
+    
+    
+    // Insert a new row into the table
+    if (($result != false) && ($alreadyFound == false)) {
+        // Insert a row into the Discovered table
+        $phql = "INSERT INTO Discovered (u_id, c_id) VALUES (:user_id:, :crumb_id:)";
+        $status = $app->modelsManager->executeQuery($phql, 
+            array(
+                'user_id' => $u_id,
+                'crumb_id' => $id
+            )
+        );
+        // Check the results
+        if ($status->success() == true) {
+            // Leave $result as true
+        } else {
+            $result = false;
+        }
+    }
+    
+    // Get the crumb data
+    if (($result != false) && ($alreadyFound == false)) {
+        $phql = "SELECT * FROM Crumb WHERE crumb_id = :id:";
+        $status = $app->modelsManager->executeQuery($phql, 
+            array(
+                'id' => $id
+            )
+        );
+        // Check the results
+        if ($status->getFirst() == true) {
+            // Leave $result as true
+        } else {
+            $result = false;
+        }
+    }
+    
+    if (($result != false) && ($alreadyFound == false)) {
+        // Add one to the crumbs total_discovered field
+        // We found one!
+        $crumb = $status->getFirst();
+        $crumb->total_discovered = $crumb->total_discovered + 1;
+        // Update the value in the database
+        $phql = "UPDATE Crumb SET total_discovered = :bites: WHERE crumb_id = :id:";
+        $status = $app->modelsManager->executeQuery($phql, 
+            array(
+                'id' => $id,
+                'bites' => $crumb->total_discovered
+            )
+        );
+        // Check the results
+        if ($status->success() == true) {
+            // Leave $result as true
+        } else {
+            $result = false;
+        }
+    }
+    
+	// Set the response    
+	if(($result == false) && ($alreadyFound == false)) {
 	    $response->setStatusCode(409, 'Conflict');
         $response->setJsonContent(
            array(
@@ -377,41 +447,32 @@ $app->get('/api/crumb/find/{id:[0-9]+}', function ($id) use ($app) {
            )
         );
 	}
-	else {
-        // We found one!
-        $crumb = $crumbs->getFirst();
-        // So add one to it's total_discovered field
-        $crumb->total_discovered = $crumb->total_discovered + 1;
-        // Update the value in the database
-        $phql = "UPDATE Crumb SET total_discovered = :bites: WHERE crumb_id = :id:";
-        $status = $app->modelsManager->executeQuery($phql, 
+	else if ($alreadyFound == true) {
+        $response->setStatusCode(201, "Created");
+        $response->setJsonContent(
             array(
-                'id' => $id,
-                'bites' => $crumb->total_discovered
-	        )
+                'status' => 'ALREADY-FOUND',
+                'data'   => $crumb
+            )
         );
-        
-        if ($status->success() == true) {
-            // Change the HTTP status
-            $response->setStatusCode(201, "Created");
-
-            $response->setJsonContent(
-                array(
-                    'status' => 'OK',
-                    'data'   => $crumb
-                )
-            );
-        } else {
-            $response->setStatusCode(409, 'Conflict');
-            $response->setJsonContent(
-	           array(
-	               'status'   => 'ERROR',
-                   'messages' => $errors
-               )
-	       );
-        }
+    } else if ($result == true) {
+        $response->setStatusCode(201, "Created");
+        $response->setJsonContent(
+            array(
+                'status' => 'OK',
+                'data'   => $crumb
+            )
+        );
+    } else {
+        $response->setStatusCode(409, 'Conflict');
+        $response->setJsonContent(
+           array(
+               'status'   => 'ERROR',
+               'messages' => $errors
+           )
+        );
     }
-
+    
     return $response;
 });
 
@@ -441,6 +502,72 @@ $app->get('/api/user/get/createdCrumbs/{id:[0-9]+}', function ($id) use ($app) {
 	$phql = "SELECT * FROM Crumb WHERE creator_id = :id:";
 
 	//Get the list that matches the given list id
+	$crumbs = $app->modelsManager->executeQuery($phql, array(
+			'id' => $id
+	));
+
+	//Create a response to send back to the client
+	$response = new Response();
+
+	if($crumbs == false) {
+        $response->setStatusCode(404, "Not Found");
+	    $response->setJsonContent(
+	    array(
+	        'status' => 'NOT-FOUND')
+	    );
+	}
+	else {
+        /* Here is where we would loop through the results and build
+           the JSON objects*/
+        $data = array();
+        foreach ($crumbs as $crumb) {
+               $data[] = array(
+                   'crumb_id' => $crumb->crumb_id,
+                   'latitude' => $crumb->latitude,
+                   'longitude' => $crumb->longitude,
+                   'title' => $crumb->title,
+                   'total_discovered' => $crumb->total_discovered,
+                   'rating' => $crumb->rating
+               ); 
+        }
+        $response->setStatusCode(200, "Success");
+        $response->setJsonContent(
+            array(
+	            'status' => 'FOUND',
+	            'data' => $data
+            )
+        );
+    }
+
+    return $response;
+});
+
+//-------------------------------------------------------------------------------
+// Function Name: getUserDiscoveredCrumbs
+// Description: Get all of the crumbs, and their contents, that have been
+//              discovered by a certain user.
+// URL: http://uaf132701.ddns.uark.edu/api/user/get/discoveredCrumbs
+// Method: GET
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”FOUND”,
+//         “data”: “{crumb objects}”
+//        }
+//    if not success:
+//        {
+//         “status”:”NOT-FOUND”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 200 (Success)
+//  No Cumbs Found: 404 (Not Found)
+//   
+//-------------------------------------------------------------------------------
+$app->get('/api/user/get/discoveredCrumbs/{id:[0-9]+}', function ($id) use ($app) {
+	$phql = "SELECT Crumb.* FROM Discovered LEFT OUTER JOIN Crumb ON c_id = Crumb.crumb_id WHERE Discovered.u_id = :id:";
+
+	//Get the crumbs that the user has found
 	$crumbs = $app->modelsManager->executeQuery($phql, array(
 			'id' => $id
 	));
