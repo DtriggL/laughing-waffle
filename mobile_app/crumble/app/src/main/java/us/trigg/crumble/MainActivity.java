@@ -9,14 +9,17 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -31,6 +34,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -59,11 +63,10 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import us.trigg.crumble.fragments.LogbookFragment;
 import us.trigg.crumble.fragments.LoginFragment;
@@ -106,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private GoogleMap mMap;
 
-    // Locaiton API client
+    // Location API client
     protected GoogleApiClient mGoogleApiClient;
     // Location Request
     protected LocationRequest mLocationRequest;
@@ -156,6 +159,8 @@ public class MainActivity extends AppCompatActivity implements
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        FontsOverride.setDefaultFont(this, "DEFAULT", "lobster.otf");
 
         // Setup the view elements
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -247,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements
         mMap = googleMap;
 
         // Set up the map padding
-        mMap.setPadding(0, 60, 0, 0);
+        mMap.setPadding(0, 200, 0, 0);
 
         setUpClusterer();
 
@@ -896,7 +901,7 @@ public class MainActivity extends AppCompatActivity implements
             // Set the altitude
             double alt = 3.28084 * mCurrentLocation.getAltitude();
             if (alt != 0) {
-                String alt_str = String.format("%.2f", altitude);
+                String alt_str = String.format(Locale.ENGLISH ,"%.2f", alt);
                 altitude.setText(alt_str);
             }
             heading.setText(Float.toString(mCurrentLocation.getBearing()));

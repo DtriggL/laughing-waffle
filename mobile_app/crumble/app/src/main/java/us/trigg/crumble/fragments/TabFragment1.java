@@ -39,24 +39,43 @@ public class TabFragment1 extends Fragment {
         list=new ArrayList<HashMap<String,String>>();
 
         HashMap<String,String> temp=new HashMap<String, String>();
-        temp.put("First", "Title1");
-        temp.put("Second", "Message1");
-        temp.put("Third", "Rating1");
-        temp.put("Fourth", "Date1");
+        temp.put("First", "Hotz Hall Scavenger Hunt 1");
+        temp.put("Second", "Feeling hungry? Finding the first clue will be a treat!");
+        temp.put("Third", "5");
+        temp.put("Fourth", "4/25/16");
         list.add(temp);
 
         HashMap<String,String> temp2=new HashMap<String, String>();
-        temp2.put("First", "Title2");
-        temp2.put("Second", "Message2");
-        temp2.put("Third", "Rating2");
-        temp2.put("Fourth", "Date2");
+        temp2.put("First", "Hotz Hall Scavenger Hunt 2");
+        temp2.put("Second", "The next clue can be found\n in the box making a musical sound.");
+        temp2.put("Third", "5");
+        temp2.put("Fourth", "4/25/16");
         list.add(temp2);
 
         HashMap<String,String> temp3=new HashMap<String, String>();
-        temp3.put("First", "Title3");
-        temp3.put("Second", "Message3");
-        temp3.put("Third", "Rating3");
-        temp3.put("Fourth", "Date3");
+        temp3.put("First", "Hotz Hall Scavenger Hunt 3");
+        temp3.put("Second", "The more I dry, the wetter I become.\n" +
+                            "Find me and you're almost done!");
+        temp3.put("Third", "5");
+        temp3.put("Fourth", "4/25/16");
+        list.add(temp3);
+
+        HashMap<String,String> temp4=new HashMap<String, String>();
+        temp3.put("First", "The best fishing spot on Beaver Lake");
+        temp3.put("Second", "This was a great spot to find a lot of Striped Bass!\n" +
+                "You can always find a massive school here.");
+        temp3.put("Third", "2");
+        temp3.put("Fourth", "4/10/16");
+        list.add(temp3);
+
+        HashMap<String,String> temp5=new HashMap<String, String>();
+        temp3.put("First", "Biker's Ultimate Challenge Course");
+        temp3.put("Second", "Guaranteed biker's high. Ruts, drop-offs," +
+                "narrow raodways!\n This trail has everything. Start at a\n" +
+                "a beautiful lake and end up at the\n top of a mountian with" +
+                "a fantastic view!");
+        temp3.put("Third", "4.2");
+        temp3.put("Fourth", "3/16/16");
         list.add(temp3);
 
         ListViewAdapter adapter=new ListViewAdapter(getActivity(), list);

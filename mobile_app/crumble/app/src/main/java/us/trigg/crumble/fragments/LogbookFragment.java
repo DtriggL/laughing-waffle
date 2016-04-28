@@ -33,10 +33,14 @@ public class LogbookFragment extends Fragment {
         ListView logBookListView = (ListView) rootView.findViewById(R.id.logbookListView);
         logBookListView.setAdapter(logEntriesAdapter);
 
-        logEntries.add("2/16/16 Discovered: The best fishing spot on Beaver Lake\nuser: tdlatour");
-        logEntries.add("3/02/16 Discovered: hiking must see @ sunset\nuser: jcl006");
-        logEntries.add("3/03/16 Discovered: hiking must see @ sunrise\nuser: jcl006");
-        logEntries.add("3/10/16 Discovered: 11 things you never expected to find in Central Park\nuser: mseeram");
+        logEntries.add("4/25/16 \nDropped: Hotz Hall Scavenger Hunt 1\nuser: meghan03");
+        logEntries.add("4/25/16 \nDropped: Hotz Hall Scavenger Hunt 2\nuser: meghan03");
+        logEntries.add("4/25/16 \nDropped: Hotz Hall Scavenger Hunt 3\nuser: meghan03");
+        logEntries.add("4/10/16 \nDropped: The best fishing spot on Beaver Lake\nuser: meghan03");
+        logEntries.add("3/29/16 \nDiscovered: hiking must see @ sunset\nuser: jcl006");
+        logEntries.add("3/16/16 \nDropped: Biker's Ultimate Challenge Course \nuser: meghan03");
+        logEntries.add("3/03/16 \nDiscovered: hiking must see @ sunrise\nuser: jcl006");
+        logEntries.add("2/10/16 \nDiscovered: 11 things you never expected to find in Central Park\nuser: mseeram");
 
         logEntriesAdapter.notifyDataSetChanged();
 
