@@ -37,6 +37,7 @@
             android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:inputType="textPassword"
             android:hint="@string/password_hint"/>
 
         <LinearLayout
@@ -48,12 +49,14 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/login_signup"/>
+                android:text="@string/login_signup"
+                android:onClick="onSignupClicked"/>
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/login"/>
+                android:text="@string/login"
+                android:onClick="onLoginClicked"/>
 
         </LinearLayout>
 
