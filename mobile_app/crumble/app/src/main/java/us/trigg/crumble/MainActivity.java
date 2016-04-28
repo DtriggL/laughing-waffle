@@ -3,6 +3,10 @@ package us.trigg.crumble;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -110,6 +114,10 @@ public class MainActivity extends AppCompatActivity implements
     // Location
     protected Location mCurrentLocation;
 
+    // Sensor Variables
+    private SensorManager mSensorManager;
+    Sensor magnetometer;
+
     // Fragments
     // Alert Fragment
     private NoConnectionAlertFragment alert;
@@ -164,6 +172,9 @@ public class MainActivity extends AppCompatActivity implements
 
         // Web Communications Module Initialization
         myWebCom = new WebCom(this, this);
+
+        // Initialization of sensors
+        setupSensorManager();
 
         android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
         sFm.beginTransaction().add(R.id.map, sMapFragment).commit();
@@ -559,6 +570,18 @@ public class MainActivity extends AppCompatActivity implements
 
     //-----------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------
+    private void setupSensorManager() {
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        if (mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null) {
+            // Success! There's a magnetometer.
+            magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        } else {
+            // Failure! No magnetometer.
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
     private float getDistanceToCrumb(Location location, Crumb crumb) {
         Location crumbLocation = new Location("");
         LatLng crumbPosition = crumb.getPosition();
@@ -835,13 +858,13 @@ public class MainActivity extends AppCompatActivity implements
             mCurrentLocation = location;
             Log.v(TAG, "Location Updated: " + location.toString());
             updateMap();
+            updateHUD();
         }
 
         private void updateMap() {
             if (routed) {
                 // If so, call drawRoute and update distance, bearing, and altitude. drawRoute(); updateHUD();
                 // If distance is less than required, launch the crumb display fragment.
-                updateHUD();
                 drawRoute();
                 checkFound();
             }
@@ -870,9 +893,12 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         private void updateHUD() {
-            //altitude.setText(Double.toString(mCurrentLocation.getAltitude()));
-            String alt_str = String.format("%.2f", mCurrentLocation.getAltitude());
-            altitude.setText(alt_str);
+            // Set the altitude
+            double alt = 3.28084 * mCurrentLocation.getAltitude();
+            if (alt != 0) {
+                String alt_str = String.format("%.2f", altitude);
+                altitude.setText(alt_str);
+            }
             heading.setText(Float.toString(mCurrentLocation.getBearing()));
             distance.setText(Float.toString(mCurrentLocation.getSpeed()));
         }
@@ -987,6 +1013,21 @@ public class MainActivity extends AppCompatActivity implements
             } else {
                 return cluster.getSize() > MIN_CLUSTER_SIZE;
             }
+        }
+    }
+
+    //----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
+    private class MySensorEventListener implements SensorEventListener {
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
         }
     }
 
