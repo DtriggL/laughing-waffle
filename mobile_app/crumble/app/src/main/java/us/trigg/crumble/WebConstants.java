@@ -41,9 +41,11 @@ public class WebConstants {
         public static final String COLUMN_LONGITUDE = "longitude";
         public static final String COLUMN_TOTAL_DISCOVERED = "total_discovered";
         public static final String COLUMN_RATING = "rating";
+        public static final String COLUMN_RATINGS = "ratings";
         public static final String COLUMN_TITLE = "title";
         public static final String COLUMN_MESSAGE = "message";
         public static final String COLUMN_CREATOR_ID = "creator_id";
+        public static final String COLUMN_CREATE_DATE = "creation_date";
 
     }
 

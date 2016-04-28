@@ -79,6 +79,7 @@ import static us.trigg.crumble.WebConstants.STATUS_TAG;
 // 4. (DONE) Don't want to be able to route to multiple crumbs
 // 5. Download crumb content when routed to it
 // 6. (DONE) Don't want crumb that you're routed to to be clustered
+// 7. Login
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
@@ -362,7 +363,18 @@ public class MainActivity extends AppCompatActivity implements
     public void onFindCrumb(JSONObject json) {}
 
     @Override
-    public void onGetCrumb(JSONObject json) {}
+    public void onGetCrumb(JSONObject json) {
+        // Use the JSON crumb to set the crumb details
+        try {
+            // If the crumb was found by the server
+            if (json.getString(STATUS_TAG).compareTo("FOUND") == 0) {
+                // Add the rest of the data to the crumb
+                toCrumb.setByJson(json.getJSONObject(PAYLOAD_TAG));
+            }
+        } catch (JSONException e) {
+            Log.v(TAG, "Unable to set toCrumb from server results.");
+        }
+    }
 
     @Override
     public void onAddCrumb(JSONObject json) {}
@@ -624,7 +636,8 @@ public class MainActivity extends AppCompatActivity implements
         if (marker != null) {
 
         }
-        // TODO: Download additional crumb details and save them to the crumb
+        myWebCom.getCrumb(toCrumb.getCrumb_id());
+
         routed = true;
         // Turn on the HUD
         showHUD();
