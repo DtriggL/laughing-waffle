@@ -1022,7 +1022,7 @@ public class MainActivity extends AppCompatActivity implements
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-
+        
         }
 
         @Override
