@@ -155,7 +155,74 @@ Crumble-api
 //   
 //-------------------------------------------------------------------------------
 
-// Get all logbook items for a certain user_id
+//-------------------------------------------------------------------------------
+// Function Name: getLogbook
+// Description: Get all of the logbook entries for a specific user_id.
+// URL: http://uaf132701.ddns.uark.edu/api/user/logbook/<id>
+// Method: GET
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”FOUND”,
+//         “data”: “{logbook entries}”
+//        }
+//    if not success:
+//        {
+//         “status”:”NOT-FOUND”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 200 (Success)
+//  User Not Found: 404 (Not Found)
+//   
+//-------------------------------------------------------------------------------
 
-// Insert into logbook based on user_id
+//-------------------------------------------------------------------------------
+// Function Name: addLogEntry
+// Description: Add a crumb to the database
+// URL: http://uaf132701.ddns.uark.edu/api/crumb/add
+// Method: POST
+// Payload: JSON Crumb Object: Fields are:
+//    1. user_id
+//    2. content
+//
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”OK”,
+//         “data”: “{logbook entry}”
+//        }
+//    if not success:
+//        {
+//         “status”:”ERROR”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 201 (Created)
+//  User Not Found: 409 (Conflict)
+//   
+//-------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------
+// Function Name: login
+// Description: Login a user and return the user_id
+// URL: http://uaf132701.ddns.uark.edu/api/user/login
+// Method: POST
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”FOUND”,
+//         “data”: “{user_id}”
+//        }
+//    if not success:
+//        {
+//         “status”:”NOT-FOUND”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 200 (Success)
+//  User Not Found: 404 (Not Found)
+//   
+//-------------------------------------------------------------------------------
+
 

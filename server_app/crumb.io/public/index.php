@@ -139,14 +139,7 @@ $app->get('/api/crumb/{id:[0-9]+}', function ($id) use ($app) {
         $response->setJsonContent(
            array(
                 'status' => 'FOUND',
-                'data' => array(
-                    'crumb_id' => $crumb->crumb_id,
-                    'creator_id' => $crumb->creator_id,
-                    'latitude' => $crumb->latitude,
-                    'longitude' => $crumb->longitude,
-                    'title' => $crumb->title,
-                    'message' => $crumb->message
-                    )
+                'data' => $crumb
             )
         );
     }
@@ -230,7 +223,11 @@ $app->post('/api/crumb/edit', function () use ($app) {
 //-------------------------------------------------------------------------------
 $app->post('/api/user/add', function () use ($app) {
     // Get the raw JSON content
-    $user = $app->request->getJsonRawBody();
+    $user->user_name = $app->request->getPost("user_name");
+    $user->first_name = $app->request->getPost("first_name");
+    $user->last_name = $app->request->getPost("last_name");
+    $user->email = $app->request->getPost("email");
+    $user->password = $app->request->getPost("password");
 
     $phql = "INSERT INTO User (user_name, first_name, last_name, email, password) VALUES (:user_name:, :first_name:, :last_name:, :email:, :password:)";
     // Get a collection of users that meet the criteria
@@ -601,6 +598,199 @@ $app->get('/api/user/get/discoveredCrumbs/{id:[0-9]+}', function ($id) use ($app
             array(
 	            'status' => 'FOUND',
 	            'data' => $data
+            )
+        );
+    }
+
+    return $response;
+});
+
+
+//-------------------------------------------------------------------------------
+// Function Name: getLogbook
+// Description: Get all of the logbook entries for a specific user_id.
+// URL: http://uaf132701.ddns.uark.edu/api/user/logbook/<id>
+// Method: GET
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”FOUND”,
+//         “data”: “{logbook entries}”
+//        }
+//    if not success:
+//        {
+//         “status”:”NOT-FOUND”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 200 (Success)
+//  User Not Found: 404 (Not Found)
+//   
+//-------------------------------------------------------------------------------
+$app->get('/api/user/logbook/{id:[0-9]+}', function ($id) use ($app) {
+	$phql = "SELECT * FROM Logbook WHERE user_id = :id:";
+
+	//Get the list that matches the given list id
+	$entries = $app->modelsManager->executeQuery($phql, array(
+			'id' => $id
+	));
+
+	//Create a response to send back to the client
+	$response = new Response();
+
+	if($entries == false) {
+        $response->setStatusCode(404, "Not Found");
+	    $response->setJsonContent(
+	    array(
+	        'status' => 'NOT-FOUND')
+	    );
+	}
+	else {
+        /* Here is where we would loop through the results and build
+           the JSON objects*/
+        $data = array();
+        foreach ($entries as $entry) {
+               $data[] = array(
+                   'entry_id' => $entry->entry_id,
+                   'content' => $entry->content,
+               ); 
+        }
+        $response->setStatusCode(200, "Success");
+        $response->setJsonContent(
+            array(
+	            'status' => 'FOUND',
+	            'data' => $data
+            )
+        );
+    }
+
+    return $response;
+});
+
+//-------------------------------------------------------------------------------
+// Function Name: addLogEntry
+// Description: Add a crumb to the database
+// URL: http://uaf132701.ddns.uark.edu/api/crumb/add
+// Method: POST
+// Payload: JSON Crumb Object: Fields are:
+//    1. user_id
+//    2. content
+//
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”OK”,
+//         “data”: “{logbook entry}”
+//        }
+//    if not success:
+//        {
+//         “status”:”ERROR”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 201 (Created)
+//  User Not Found: 409 (Conflict)
+//   
+//-------------------------------------------------------------------------------
+$app->post('/api/user/logbook/add', function () use ($app) {
+    // Get the raw POST content
+    $item->user_id = $app->request->getPost("user_id");
+    $item->content = $app->request->getPost("content");
+
+    $phql = "INSERT INTO Logbook (user_id, content) VALUES (:user_id:, :content:)";
+    // Get a collection of users that meet the criteria
+    $status = $app->modelsManager->executeQuery($phql, array(
+        'user_id' => $item->user_id,
+        'content' => $item->content
+    ));
+
+    // Create a response
+    $response = new Response();
+
+    if ($status->success() == true) {
+        // Change the HTTP status
+        $response->setStatusCode(201, "Created");
+
+        $item->entry_id = $status->getModel()->entry_id;
+
+        $response->setJsonContent(
+            array(
+                'status' => 'OK',
+                'data'   => $item
+            )
+        );
+
+    } else {
+        // Change the HTTP status
+        $response->setStatusCode(409, "Conflict");
+
+        // Send errors to the client
+        $errors = array();
+        foreach ($status->getMessages() as $message) {
+            $errors[] = $message->getMessage();
+        }
+
+        $response->setJsonContent(
+            array(
+                'status'   => 'ERROR',
+                'messages' => $errors
+            )
+        );
+    }
+
+    return $response;
+});
+
+//-------------------------------------------------------------------------------
+// Function Name: login
+// Description: Login a user and return the user_id
+// URL: http://uaf132701.ddns.uark.edu/api/user/login
+// Method: POST
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”FOUND”,
+//         “data”: “{user_id}”
+//        }
+//    if not success:
+//        {
+//         “status”:”NOT-FOUND”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 200 (Success)
+//  User Not Found: 404 (Not Found)
+//   
+//-------------------------------------------------------------------------------
+$app->post('/api/user/login', function ($id) use ($app) {
+    // Get the raw POST content
+    $user->user_name = $app->request->getPost("user_name");
+    $user->password = $app->request->getPost("password");
+    
+	$phql = "SELECT * FROM User WHERE user_name = :user_name: AND password = :password:";
+
+	$users = $app->modelsManager->executeQuery($phql, array(
+        'user_name' => $user->user_name,
+        'password' => $user->password
+	));
+
+	//Create a response to send back to the client
+	$response = new Response();
+
+	if($users == false) {
+        $response->setStatusCode(404, "Not Found");
+	    $response->setJsonContent(
+	    array(
+	        'status' => 'NOT-FOUND')
+	    );
+	}
+	else {
+        $user = $users->getFirst();
+        $response->setStatusCode(200, "Success");
+        $response->setJsonContent(
+            array(
+	            'status' => 'FOUND',
+	            'data' => $user
             )
         );
     }
