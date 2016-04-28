@@ -37,7 +37,8 @@
     <!-- Strings to be used for the map HUD -->
     <string name="heading">Heading</string>
     <string name="altitude">Altitude (MSL)</string>
-    <string name="distance">Distance</string>
+    <string name="distance">Distance (Meters)</string>
+    <string name="na">N/A</string>
 
 
 </resources>

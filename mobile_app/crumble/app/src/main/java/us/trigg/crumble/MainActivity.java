@@ -3,23 +3,16 @@ package us.trigg.crumble;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -81,7 +74,7 @@ import static us.trigg.crumble.WebConstants.STATUS_TAG;
 
 // TODO:
 // 1. (DONE) Fix server code to send right information
-// 2. Update the HUD correctly
+// 2. (DONE) Update the HUD correctly
 // 3. Be able to stop a route
 // 4. (DONE) Don't want to be able to route to multiple crumbs
 // 5. Download crumb content when routed to it
@@ -118,8 +111,7 @@ public class MainActivity extends AppCompatActivity implements
     protected Location mCurrentLocation;
 
     // Sensor Variables
-    private SensorManager mSensorManager;
-    Sensor magnetometer;
+    Compass compass;
 
     // Fragments
     // Alert Fragment
@@ -178,8 +170,8 @@ public class MainActivity extends AppCompatActivity implements
         // Web Communications Module Initialization
         myWebCom = new WebCom(this, this);
 
-        // Initialization of sensors
-        setupSensorManager();
+        // Compass Instantiation
+        compass = new Compass(this);
 
         android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
         sFm.beginTransaction().add(R.id.map, sMapFragment).commit();
@@ -575,18 +567,6 @@ public class MainActivity extends AppCompatActivity implements
 
     //-----------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------
-    private void setupSensorManager() {
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        if (mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null) {
-            // Success! There's a magnetometer.
-            magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-        } else {
-            // Failure! No magnetometer.
-        }
-    }
-
-    //-----------------------------------------------------------------------------------
-    //-----------------------------------------------------------------------------------
     private float getDistanceToCrumb(Location location, Crumb crumb) {
         Location crumbLocation = new Location("");
         LatLng crumbPosition = crumb.getPosition();
@@ -899,13 +879,20 @@ public class MainActivity extends AppCompatActivity implements
 
         private void updateHUD() {
             // Set the altitude
+            // Convert it to feet
             double alt = 3.28084 * mCurrentLocation.getAltitude();
             if (alt != 0) {
                 String alt_str = String.format(Locale.ENGLISH ,"%.2f", alt);
                 altitude.setText(alt_str);
             }
-            heading.setText(Float.toString(mCurrentLocation.getBearing()));
-            distance.setText(Float.toString(mCurrentLocation.getSpeed()));
+            if (routed) {
+                if (compass.isValid()) {
+                    heading.setText(String.format(Locale.ENGLISH, "%.1f", compass.getHeading()));
+                } else {
+                    heading.setText(R.string.na);
+                }
+                distance.setText(String.format(Locale.ENGLISH, "%.0f", getDistanceToCrumb(mCurrentLocation, toCrumb)));
+            }
         }
     }
 
@@ -1018,21 +1005,6 @@ public class MainActivity extends AppCompatActivity implements
             } else {
                 return cluster.getSize() > MIN_CLUSTER_SIZE;
             }
-        }
-    }
-
-    //----------------------------------------------------------------------------------
-    //----------------------------------------------------------------------------------
-    private class MySensorEventListener implements SensorEventListener {
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-        
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
         }
     }
 
