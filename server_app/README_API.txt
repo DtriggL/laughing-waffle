@@ -93,17 +93,136 @@ Crumble-api
 
 //-------------------------------------------------------------------------------
 // Function Name: findCrumb
-// Description: Increments the "total_discovered" field of the specified crumb.
-// URL: http://uaf132701.ddns.uark.edu/api/crumb/find/<id>
+// Description: Increments the "total_discovered" field of the specified crumb
+//      and inserts a row in the Discovered table for the specified user_id
+// URL: http://uaf132701.ddns.uark.edu/api/crumb/find/<crumb_id>/<user_id>
 // Method: GET
 // Returns: JSON Object:
 //    if success:
 //        {
-//         “status” : ”FOUND”,
+//         “status” : ”OK”/"ALREADY-FOUND",
 //         “data”   : “{crumb object}”
 //        }
 //    if not success:
 //        {
-//         “status” : ”NOT-FOUND”
+//         “status” : ”ERROR"
 //        }
 //-------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------
+// Function Name: getUserCreatedCrumbs
+// Description: Get all of the crumbs, and their contents, that are created by
+//              a specified user (user_id).
+// URL: http://uaf132701.ddns.uark.edu/api/user/get/createdCrumbs
+// Method: GET
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”FOUND”,
+//         “data”: “{crumb objects}”
+//        }
+//    if not success:
+//        {
+//         “status”:”NOT-FOUND”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 200 (Success)
+//  User Not Found: 404 (Not Found)
+//   
+//-------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------
+// Function Name: getUserDiscoveredCrumbs
+// Description: Get all of the crumbs, and their contents, that have been
+//              discovered by a certain user.
+// URL: http://uaf132701.ddns.uark.edu/api/user/get/discoveredCrumbs
+// Method: GET
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”FOUND”,
+//         “data”: “{crumb objects}”
+//        }
+//    if not success:
+//        {
+//         “status”:”NOT-FOUND”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 200 (Success)
+//  No Cumbs Found: 404 (Not Found)
+//   
+//-------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------
+// Function Name: getLogbook
+// Description: Get all of the logbook entries for a specific user_id.
+// URL: http://uaf132701.ddns.uark.edu/api/user/logbook/<id>
+// Method: GET
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”FOUND”,
+//         “data”: “{logbook entries}”
+//        }
+//    if not success:
+//        {
+//         “status”:”NOT-FOUND”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 200 (Success)
+//  User Not Found: 404 (Not Found)
+//   
+//-------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------
+// Function Name: addLogEntry
+// Description: Add a crumb to the database
+// URL: http://uaf132701.ddns.uark.edu/api/api/user/logbook/add
+// Method: POST
+// Payload: JSON Crumb Object: Fields are:
+//    1. user_id
+//    2. content
+//
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”OK”,
+//         “data”: “{logbook entry}”
+//        }
+//    if not success:
+//        {
+//         “status”:”ERROR”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 201 (Created)
+//  User Not Found: 409 (Conflict)
+//   
+//-------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------
+// Function Name: login
+// Description: Login a user and return the user_id
+// URL: http://uaf132701.ddns.uark.edu/api/user/login
+// Method: POST
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”FOUND”,
+//         “data”: “{user_id}”
+//        }
+//    if not success:
+//        {
+//         “status”:”NOT-FOUND”
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 200 (Success)
+//  User Not Found: 404 (Not Found)
+//   
+//-------------------------------------------------------------------------------
+
+
