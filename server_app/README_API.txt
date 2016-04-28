@@ -180,7 +180,7 @@ Crumble-api
 //-------------------------------------------------------------------------------
 // Function Name: addLogEntry
 // Description: Add a crumb to the database
-// URL: http://uaf132701.ddns.uark.edu/api/crumb/add
+// URL: http://uaf132701.ddns.uark.edu/api/api/user/logbook/add
 // Method: POST
 // Payload: JSON Crumb Object: Fields are:
 //    1. user_id

@@ -15,5 +15,13 @@ import us.trigg.crumble.Crumb;
 public abstract interface WebComHandler {
     public void onGetOwnedCrumbs(JSONObject json);
     public void onGetAllCrumbs (JSONObject json);
+    public void onGetFoundCrumbs (JSONObject json);
+    public void onUserLogin(JSONObject json);
+    public void onUserAdd(JSONObject json);
+    public void onGetUserLogbook(JSONObject json);
+    public void onAddLogbookEntry(JSONObject json);
+    public void onFindCrumb(JSONObject json);
+    public void onGetCrumb(JSONObject json);
+    public void onAddCrumb(JSONObject json);
     public android.app.FragmentManager getFragmentManager();
 }

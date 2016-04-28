@@ -670,7 +670,7 @@ $app->get('/api/user/logbook/{id:[0-9]+}', function ($id) use ($app) {
 //-------------------------------------------------------------------------------
 // Function Name: addLogEntry
 // Description: Add a crumb to the database
-// URL: http://uaf132701.ddns.uark.edu/api/crumb/add
+// URL: http://uaf132701.ddns.uark.edu/api/user/logbook/add
 // Method: POST
 // Payload: JSON Crumb Object: Fields are:
 //    1. user_id

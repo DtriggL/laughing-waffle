@@ -328,14 +328,36 @@ public class MainActivity extends AppCompatActivity implements
     // WebComHandler Event Handlers
     //-----------------------------------------------------------------------------------
     @Override
-    public void onGetOwnedCrumbs(JSONObject json) {
-
-    }
+    public void onGetOwnedCrumbs(JSONObject json) {}
 
     @Override
     public void onGetAllCrumbs(JSONObject json) {
         addCrumbs(json);
     }
+
+    @Override
+    public void onGetFoundCrumbs(JSONObject json){}
+
+    @Override
+    public void onUserLogin(JSONObject json){}
+
+    @Override
+    public void onUserAdd(JSONObject json) {}
+
+    @Override
+    public void onGetUserLogbook(JSONObject json) {}
+
+    @Override
+    public void onAddLogbookEntry(JSONObject josn) {}
+
+    @Override
+    public void onFindCrumb(JSONObject json) {}
+
+    @Override
+    public void onGetCrumb(JSONObject json) {}
+
+    @Override
+    public void onAddCrumb(JSONObject json) {}
 
     //-----------------------------------------------------------------------------------
     // Floating Action Button Visibility
