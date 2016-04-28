@@ -15,7 +15,6 @@
         android:clickable="true"
         app:borderWidth="0dp"
         app:elevation="6dp"
-        app:fabSize="mini"
         app:backgroundTint="@color/colorOrange" />
 
 </FrameLayout>

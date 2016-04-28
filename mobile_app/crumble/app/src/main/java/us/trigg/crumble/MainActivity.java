@@ -1,16 +1,17 @@
 package us.trigg.crumble;
 
 import android.app.AlertDialog;
-import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,7 +22,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,7 +53,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,13 +85,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private GoogleMap mMap;
 
-<<<<<<< HEAD
-
-
-    // Locaiton API client
-=======
     // Location API client
->>>>>>> 815c8dabd5e02a371d4ca414f448005f6880c230
     protected GoogleApiClient mGoogleApiClient;
     // Location Request
     protected LocationRequest mLocationRequest;
@@ -105,10 +98,6 @@ public class MainActivity extends AppCompatActivity implements
     private NoConnectionAlertFragment alert;
     SupportMapFragment sMapFragment;
 
-<<<<<<< HEAD
-    //fab
-    private FloatingActionButton fab;
-=======
     // UI Elements
     // HUD
     private TextView heading;
@@ -119,7 +108,9 @@ public class MainActivity extends AppCompatActivity implements
     Crumb toCrumb;
     boolean routed;
     Polyline routeLine;
->>>>>>> 815c8dabd5e02a371d4ca414f448005f6880c230
+
+    //fab
+    private FloatingActionButton fab;
 
     //-----------------------------------------------------------------------------------
     // Life-cycle Event Handlers
@@ -136,6 +127,8 @@ public class MainActivity extends AppCompatActivity implements
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        FontsOverride.setDefaultFont(this, "DEFAULT", "lobster.otf");
 
         // Setup the view elements
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -167,7 +160,6 @@ public class MainActivity extends AppCompatActivity implements
         // Create the location request
         createLocationRequest();
 
-<<<<<<< HEAD
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -220,13 +212,6 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
         fab.show();
-=======
-        // Initialize route attributes
-        toCrumb = null;
-        routed = false;
-        hideHUD();
-        routeLine = null;
->>>>>>> 815c8dabd5e02a371d4ca414f448005f6880c230
     }
 
     @Override
@@ -260,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements
         mMap = googleMap;
 
         // Set up the map padding
-        mMap.setPadding(0, 60, 0, 0);
+        mMap.setPadding(0, 200, 0, 0);
 
         setUpClusterer();
 

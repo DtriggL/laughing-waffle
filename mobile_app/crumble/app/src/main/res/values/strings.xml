@@ -8,12 +8,17 @@
     <string name="action_settings">Settings (not implemented)</string>
     <string name="login_settings">Login</string>
 
-    <string name="title_activity_login">Login</string>
+    <string name="title_activity_login">Premium Users</string>
+    <string name="login">Login</string>
     <string name="username_hint">Username</string>
     <string name="password_hint">Password</string>
 
     <string name="title_activity_explore">Map</string>
     <string name="title_activity_main">MainActivity</string>
+
+    <string name="pin_content_done">Done</string>
+    <string name="default_pin_title">Crumb Title...</string>
+    <string name="default_pin_content">Crumb Content...</string>
 
     <string name="logbook">Logbook</string>
     <string name="navigationmenu_title">Menu</string>
@@ -32,5 +37,6 @@
     <string name="heading">Heading</string>
     <string name="altitude">Altitude (MSL)</string>
     <string name="distance">Distance</string>
+
 
 </resources>
