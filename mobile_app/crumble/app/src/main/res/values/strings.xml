@@ -8,8 +8,9 @@
     <string name="action_settings">Settings (not implemented)</string>
     <string name="login_settings">Login</string>
 
-    <string name="title_activity_login">Premium Users</string>
+    <string name="title_activity_login">One Account.\nAll of Crumble.</string>
     <string name="login">Login</string>
+    <string name="login_signup">Sign Up</string>
     <string name="username_hint">Username</string>
     <string name="password_hint">Password</string>
 
