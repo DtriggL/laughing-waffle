@@ -126,6 +126,7 @@ public class Crumb implements ClusterItem {
             // Set the message
             String message_str = jsonCrumb.getString(COLUMN_MESSAGE);
             this.setMessage(message_str);
+            Log.d(TAG, "message in set by JSON in Crumb" + message_str);
 
             // Set the creation_date
             String creation_date_str = jsonCrumb.getString(COLUMN_CREATE_DATE);

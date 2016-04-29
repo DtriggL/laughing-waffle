@@ -159,6 +159,7 @@ public class WebCom {
         params.add(new BasicNameValuePair(COLUMN_LATITUDE, latitude));
         params.add(new BasicNameValuePair(COLUMN_LONGITUDE, longitude));
         params.add(new BasicNameValuePair(COLUMN_MESSAGE, message));
+        Log.d(TAG, message + " add Crumb in WebCom message");
 
         WebRequest request = new WebRequest(URL_ADD_CRUMB, "POST", params);
         request.showProgressDialog(false);
@@ -263,7 +264,11 @@ public class WebCom {
         // Posts the result to the correct result handler depending on the URL selected.
         //-----------------------------------------------------------------------------------
         protected void postResult(JSONObject json, String url) {
-            if (url.compareTo(URL_GET_USER_CREATED_CRUMBS) == 1) {
+            String url_user_created_crumbs = url.substring(0, url.length() - 3);
+            String url_get_crumbParsed = URL_GET_CRUMB.substring(0, URL_GET_CRUMB.length() - 3);
+            Log.d(TAG, "post Result in here Manoj" + url_user_created_crumbs + " " + url_get_crumbParsed);
+
+            if (url_user_created_crumbs.compareTo(URL_GET_USER_CREATED_CRUMBS) == 0) {
                 webComHandler.onGetOwnedCrumbs(json);
             } else if (url.compareTo(URL_ALL_CRUMBS) == 0) {
                 webComHandler.onGetAllCrumbs(json);
@@ -279,8 +284,9 @@ public class WebCom {
                 webComHandler.onAddLogbookEntry(json);
             } else if (url.compareTo(URL_CRUMB_FIND) == 0) {
                 webComHandler.onFindCrumb(json);
-            } else if (url.compareTo(URL_GET_CRUMB) == 0) {
+            } else if (url_user_created_crumbs.compareTo(URL_GET_CRUMB) == 0) {
                 webComHandler.onGetCrumb(json);
+                Log.d(TAG, " webComHandler.onGetCrumb(json); is getting called" + json.toString());
             } else if (url.compareTo(URL_ADD_CRUMB) == 0) {
                 webComHandler.onAddCrumb(json);
             }

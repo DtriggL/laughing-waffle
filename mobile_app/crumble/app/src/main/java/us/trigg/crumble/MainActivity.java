@@ -145,6 +145,9 @@ public class MainActivity extends AppCompatActivity implements
     boolean loggedIn;
     int userId;
 
+    //check if crumb content has been downloaded
+    boolean isDownloaded;
+
     //-----------------------------------------------------------------------------------
     // Life-cycle Event Handlers
     //-----------------------------------------------------------------------------------
@@ -188,7 +191,6 @@ public class MainActivity extends AppCompatActivity implements
 
         android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
         sFm.beginTransaction().add(R.id.map, sMapFragment).commit();
-
 
         // Start a fused API to get the user's current location
         // Create an instance of GoogleAPIClient.
@@ -384,6 +386,7 @@ public class MainActivity extends AppCompatActivity implements
             if (json.getString(STATUS_TAG).compareTo("FOUND") == 0) {
                 // Add the rest of the data to the crumb
                 toCrumb.setByJson(json.getJSONObject(PAYLOAD_TAG));
+                isDownloaded = true;
             }
         } catch (JSONException e) {
             Log.v(TAG, "Unable to set toCrumb from server results.");
@@ -470,7 +473,7 @@ public class MainActivity extends AppCompatActivity implements
 
                                         myWebCom.addCrumb(u_id, stringTitle, lat,
                                                 lng, stringContent);
-
+                                        Log.d(TAG, "the message in crumb " + stringContent);
 
                                         //new CreateNewCrumb().execute(stringTitle, stringContent, lat, lng);
 
@@ -560,10 +563,11 @@ public class MainActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setBackground(getResources().getDrawable(R.drawable.side_nav_bar));
 
-        int id = item.getItemId();
         //On every menu button click, the map fragment get's hidden
         if (sMapFragment.isAdded())
             sFm.beginTransaction().hide(sMapFragment).commit();
+
+        int id = item.getItemId();
         if (id != R.id.nav_explore) {
             hideHUD();
             stop_fab.hide();
@@ -575,13 +579,15 @@ public class MainActivity extends AppCompatActivity implements
                 showHUD();
                 stop_fab.show();
             }
+
             //The first time, map fragment needs to be added. After that, it just needs to be shown.
             if (!sMapFragment.isAdded())
                 sFm.beginTransaction().add(R.id.map, sMapFragment).commit();
             else
                 sFm.beginTransaction().show(sMapFragment).commit();
+        }
 
-        } else if (id == R.id.nav_logbook) {
+        else if (id == R.id.nav_logbook) {
             hideFloatingActionButton();
             fm.beginTransaction().replace(R.id.frag_manager_frame, new LogbookFragment()).commit();
         }
@@ -648,6 +654,7 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 endRoute();
+                isDownloaded=false;
                 stop_fab.hide();
             }
         });
@@ -938,19 +945,27 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         private void checkFound() {
+            Log.d(TAG,"found crumb, in check found" + alert1Showing + isDownloaded);
             if ((getDistanceToCrumb(mCurrentLocation, toCrumb) < DISTANCE_REQUIRED) && alert1Showing == false){
+                Log.d(TAG,"opening the alert, found crumb");
                 ImageView image = new ImageView(MainActivity.this);
                 image.setImageResource(R.drawable.crumb_pic);
                 final AlertDialog.Builder alert1 = new AlertDialog.Builder(MainActivity.this);
                 alert1.setTitle(toCrumb.getTitle());
-                alert1.setMessage(toCrumb.getMessage());
-                alert1.setIcon(getResources().getDrawable(R.drawable.side_nav_bar));
+                alert1.setMessage("Message: " + toCrumb.getMessage() + "\nPosition:\n\t\t\tLatitude: " + toCrumb.getPosition().latitude +
+                                    "\n\t\t\tLongitude: " + toCrumb.getPosition().longitude +
+                                    "\nDiscovered by: " + toCrumb.getTotalDiscovered() + "\nRating: " + toCrumb.getRating());
+                alert1.setIcon(getResources().getDrawable(R.drawable.cookie_icon));
                 alert1.setNegativeButton("Back to adventure", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         myWebCom.findCrumb(userId, toCrumb.getCrumb_id());
+                        alert1Showing = false;
+                        endRoute();
+                        isDownloaded=false;
+                        stop_fab.hide();
                     }
                 });
-                alert1.setView(image);
+                //alert1.setView(image);
                 alert1.show();
                 alert1Showing = true;
             }
