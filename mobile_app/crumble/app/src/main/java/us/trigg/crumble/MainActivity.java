@@ -1,10 +1,6 @@
 package us.trigg.crumble;
 
 import android.app.AlertDialog;
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -143,7 +139,11 @@ public class MainActivity extends AppCompatActivity implements
     //alert dialog showing discovered crumb info map boolean
     boolean alert1Showing;
 
+    //check if logged in
     SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
+    boolean loggedIn;
+    int userId;
 
     //-----------------------------------------------------------------------------------
     // Life-cycle Event Handlers
@@ -163,8 +163,9 @@ public class MainActivity extends AppCompatActivity implements
 
         FontsOverride.setDefaultFont(this, "DEFAULT", "lobster.otf");
 
-        //sharedPreferences = this.getSharedPreferences(
-          //      getString(R.string.), Context.MODE_PRIVATE);
+        //Check if user is logged in
+        sharedPreferences = this.getSharedPreferences(
+                getString(R.string.SharedPreferencesKey), Context.MODE_PRIVATE);
 
         // Setup the view elements
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -431,53 +432,58 @@ public class MainActivity extends AppCompatActivity implements
                 fab.setImageDrawable(add_icon);
                 // Set the on click
                 fab.setOnClickListener(new View.OnClickListener() {
+
                     @Override
                     public void onClick(View view) {
 
-                        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                        if (loggedIn) {
+                            AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
 
-                        LinearLayout layout = new LinearLayout(MainActivity.this);
-                        layout.setOrientation(LinearLayout.VERTICAL);
+                            LinearLayout layout = new LinearLayout(MainActivity.this);
+                            layout.setOrientation(LinearLayout.VERTICAL);
 
-                        final EditText titleBox = new EditText(MainActivity.this);
-                        titleBox.setHint("Crumb Title");
-                        layout.addView(titleBox);
+                            final EditText titleBox = new EditText(MainActivity.this);
+                            titleBox.setHint("Crumb Title");
+                            layout.addView(titleBox);
 
-                        final EditText contentBox = new EditText(MainActivity.this);
-                        contentBox.setHint("Crumb Message");
-                        layout.addView(contentBox);
+                            final EditText contentBox = new EditText(MainActivity.this);
+                            contentBox.setHint("Crumb Message");
+                            layout.addView(contentBox);
 
-                        alert.setTitle("Add Crumb");
-                        //alert.setMessage("Message");
+                            alert.setTitle("Add Crumb");
+                            //alert.setMessage("Message");
 
-                        alert.setView(layout);
+                            alert.setView(layout);
 
-                        alert.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                //insert crumb with title=stringTitle and message=stringContent
-                                if(mCurrentLocation != null) {
-                                    String stringTitle = titleBox.getText().toString();
-                                    String stringContent = contentBox.getText().toString();
-                                    String lat = Double.toString(mCurrentLocation.getLatitude());
-                                    String lng = Double.toString(mCurrentLocation.getLongitude());
+                            alert.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    //insert crumb with title=stringTitle and message=stringContent
+                                    if (mCurrentLocation != null) {
+                                        String stringTitle = titleBox.getText().toString();
+                                        String stringContent = contentBox.getText().toString();
+                                        String lat = Double.toString(mCurrentLocation.getLatitude());
+                                        String lng = Double.toString(mCurrentLocation.getLongitude());
 
-                                    new CreateNewCrumb().execute(stringTitle, stringContent, lat, lng);
+                                        new CreateNewCrumb().execute(stringTitle, stringContent, lat, lng);
+                                    } else {
+                                        Log.d(TAG, "Location null in FAB onClick");
+                                        Toast.makeText(getParent(), "No location determined. Make sure location service is enabled", Toast.LENGTH_LONG).show();
+                                    }
+
                                 }
-                                else{
-                                    Log.d(TAG, "Location null in FAB onClick");
-                                    Toast.makeText(getParent(), "No location determined. Make sure location service is enabled", Toast.LENGTH_LONG).show();
+                            });
+
+                            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    // Canceled.
                                 }
+                            });
 
-                            }
-                        });
-
-                        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                // Canceled.
-                            }
-                        });
-
-                        alert.show();
+                            alert.show();
+                        }
+                        else {
+                            Toast.makeText(MainActivity.this, "Not Logged In", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
                 break;
@@ -526,6 +532,16 @@ public class MainActivity extends AppCompatActivity implements
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+
+        //Check if logged in every time we move out of logged in fragment
+        if (sharedPreferences.contains(getString(R.string.stored_user_id))) {
+            Log.d(TAG, "checked shared preferences and user id exists");
+            userId = sharedPreferences.getInt(getString(R.string.stored_user_id), 0);
+            loggedIn = true;
+        }
+        else {
+            loggedIn = false;
+        }
 
         FragmentManager fm = getSupportFragmentManager();
         android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
@@ -920,7 +936,7 @@ public class MainActivity extends AppCompatActivity implements
                 alert1.setIcon(getResources().getDrawable(R.drawable.side_nav_bar));
                 alert1.setNegativeButton("Back to adventure", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                    //    myWebCom.findCrumb(, toCrumb.getCrumb_id());
+                        myWebCom.findCrumb(userId, toCrumb.getCrumb_id());
                     }
                 });
                 alert1.setView(image);

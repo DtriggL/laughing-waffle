@@ -1,13 +1,11 @@
 package us.trigg.crumble.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,14 +17,14 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import us.trigg.crumble.MainActivity;
 import us.trigg.crumble.R;
 import us.trigg.crumble.WebCom;
-import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
 import us.trigg.crumble.interfaces.WebComHandler;
 
-import static us.trigg.crumble.WebConstants.*;
-import static us.trigg.crumble.WebConstants.OnlineUserTableContact.*;
+import static us.trigg.crumble.WebConstants.OnlineUserTableContact.COLUMN_USER_ID;
+import static us.trigg.crumble.WebConstants.PAYLOAD_TAG;
+import static us.trigg.crumble.WebConstants.STATUS_FOUND;
+import static us.trigg.crumble.WebConstants.STATUS_TAG;
 
 /**
  * Created by ManojSeeram on 4/11/16.
