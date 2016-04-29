@@ -1,18 +1,19 @@
 package us.trigg.crumble;
 
 import android.app.AlertDialog;
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -24,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,7 +66,6 @@ import java.util.Locale;
 import us.trigg.crumble.fragments.LogbookFragment;
 import us.trigg.crumble.fragments.LoginFragment;
 import us.trigg.crumble.fragments.NoConnectionAlertFragment;
-import us.trigg.crumble.fragments.CrumbContentFragment;
 import us.trigg.crumble.fragments.PinsFragment;
 import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
 import us.trigg.crumble.interfaces.WebComHandler;
@@ -92,12 +93,11 @@ public class MainActivity extends AppCompatActivity implements
         WebComHandler {
 
     // Constants
-    public static final String EXTRA_MESSAGE = "Explore Activity";
     public static final String TAG = "Main Activity";
     public static final int FAB_GO = 1;
     public static final int FAB_ADD = 0;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-    public static final float DISTANCE_REQUIRED = 10; // Distance in meters
+    public static final float DISTANCE_REQUIRED = 20; // Distance in meters
 
     private ClusterManager<Crumb> mClusterManager;
     private MyClusterRender mClusterRenderer;
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements
     // Fragments
     // Alert Fragment
     private NoConnectionAlertFragment alert;
-    SupportMapFragment sMapFragment;
+    public SupportMapFragment sMapFragment;
 
     //fab
     private FloatingActionButton fab;
@@ -138,6 +138,11 @@ public class MainActivity extends AppCompatActivity implements
     boolean routed;
     Polyline routeLine;
 
+    //alert dialog showing discovered crumb info map boolean
+    boolean alert1Showing;
+
+    SharedPreferences sharedPreferences;
+
     //-----------------------------------------------------------------------------------
     // Life-cycle Event Handlers
     //-----------------------------------------------------------------------------------
@@ -155,6 +160,9 @@ public class MainActivity extends AppCompatActivity implements
         toggle.syncState();
 
         FontsOverride.setDefaultFont(this, "DEFAULT", "lobster.otf");
+
+        sharedPreferences = this.getSharedPreferences(
+                getString(R.string.), Context.MODE_PRIVATE);
 
         // Setup the view elements
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -358,7 +366,7 @@ public class MainActivity extends AppCompatActivity implements
     public void onGetUserLogbook(JSONObject json) {}
 
     @Override
-    public void onAddLogbookEntry(JSONObject josn) {}
+    public void onAddLogbookEntry(JSONObject json) {}
 
     @Override
     public void onFindCrumb(JSONObject json) {
@@ -857,8 +865,9 @@ public class MainActivity extends AppCompatActivity implements
     private class MyLocationListener implements LocationListener {
 
         FragmentManager fm = getSupportFragmentManager();
+        android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
 
-        @Override
+       @Override
         public void onLocationChanged(Location location) {
             mCurrentLocation = location;
             Log.v(TAG, "Location Updated: " + location.toString());
@@ -876,8 +885,21 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         private void checkFound() {
-            if (getDistanceToCrumb(mCurrentLocation, toCrumb) < DISTANCE_REQUIRED){
-                fm.beginTransaction().replace(R.id.frag_manager_frame, new CrumbContentFragment()).commit();
+            if ((getDistanceToCrumb(mCurrentLocation, toCrumb) < DISTANCE_REQUIRED) && alert1Showing == false){
+                ImageView image = new ImageView(MainActivity.this);
+                image.setImageResource(R.drawable.crumb_pic);
+                final AlertDialog.Builder alert1 = new AlertDialog.Builder(MainActivity.this);
+                alert1.setTitle(toCrumb.getTitle());
+                alert1.setMessage(toCrumb.getMessage());
+                alert1.setIcon(getResources().getDrawable(R.drawable.side_nav_bar));
+                alert1.setNegativeButton("Back to adventure", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        myWebCom.findCrumb(, toCrumb.getCrumb_id());
+                    }
+                });
+                alert1.setView(image);
+                alert1.show();
+                alert1Showing = true;
             }
         }
         private void drawRoute() {

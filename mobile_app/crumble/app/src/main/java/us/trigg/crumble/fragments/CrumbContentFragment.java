@@ -3,6 +3,7 @@ package us.trigg.crumble.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,8 @@ public class CrumbContentFragment extends Fragment {
 
         title.setText(toCrumb.getTitle());
         content.setText(toCrumb.getMessage());
+
+        Log.d("CCF", "made it. why didn't fragment activity start?");
 
         return rootView;
     }

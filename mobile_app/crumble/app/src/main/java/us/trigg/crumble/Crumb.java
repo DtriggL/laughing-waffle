@@ -9,8 +9,16 @@ import com.google.maps.android.clustering.ClusterItem;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Date;
-import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.*;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_CREATE_DATE;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_CREATOR_ID;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_CRUMB_ID;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_LATITUDE;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_LONGITUDE;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_MESSAGE;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_RATING;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_RATINGS;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_TITLE;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_TOTAL_DISCOVERED;
 
 /**
  * Created by trigglatour on 3/1/16.
@@ -70,8 +78,6 @@ public class Crumb implements ClusterItem {
     // Setters
     //-----------------------------------------------------------------
     public void setTitle(String t) { title = t; }
-
-    public void setMessage(String m) { message = m; }
 
     public void setLocation(String lat, String lng) { latitude = lat; longitude = lng; }
 
