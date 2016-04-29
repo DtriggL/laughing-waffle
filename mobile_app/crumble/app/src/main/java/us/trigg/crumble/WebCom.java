@@ -284,7 +284,7 @@ public class WebCom {
                 webComHandler.onAddLogbookEntry(json);
             } else if (url.compareTo(URL_CRUMB_FIND) == 0) {
                 webComHandler.onFindCrumb(json);
-            } else if (url_user_created_crumbs.compareTo(URL_GET_CRUMB) == 0) {
+            } else if (url.contains(URL_GET_CRUMB)) {
                 webComHandler.onGetCrumb(json);
                 Log.d(TAG, " webComHandler.onGetCrumb(json); is getting called" + json.toString());
             } else if (url.compareTo(URL_ADD_CRUMB) == 0) {
