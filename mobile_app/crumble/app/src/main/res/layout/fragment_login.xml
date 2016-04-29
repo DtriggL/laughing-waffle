@@ -47,16 +47,15 @@
             android:orientation="horizontal">
 
             <Button
+                android:id="@+id/signup_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/login_signup"
-                android:onClick="onSignupClicked"/>
-
+                android:text="@string/login_signup"/>
             <Button
+                android:id="@+id/login_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/login"
-                android:onClick="onLoginClicked"/>
+                android:text="@string/login"/>
 
         </LinearLayout>
 

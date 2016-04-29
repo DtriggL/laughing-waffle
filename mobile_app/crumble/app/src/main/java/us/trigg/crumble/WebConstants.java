@@ -32,6 +32,10 @@ public class WebConstants {
     public static final String STATUS_TAG = "status";
     public static final String PAYLOAD_TAG = "data";
 
+    // JSON Status Field Values
+    public static final String STATUS_FOUND = "FOUND";
+    public static final String STATUS_NOT_FOUND = "NOT-FOUND";
+
     public static class OnlineCrumbTableContact {
         private OnlineCrumbTableContact() {}
 
@@ -58,6 +62,7 @@ public class WebConstants {
         public static final String COLUMN_FIRST_NAME = "first_name";
         public static final String COLUMN_LAST_NAME = "last_name";
         public static final String COLUMN_EMAIL = "email";
+        public static final String COLUMN_USER_ID = "user_id";
     }
 
     public static class OnlineLogbookTableContact {

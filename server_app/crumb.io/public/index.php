@@ -776,8 +776,9 @@ $app->post('/api/user/login', function ($id) use ($app) {
 
 	//Create a response to send back to the client
 	$response = new Response();
-
-	if($users == false) {
+    $user = $users->getFirst();
+    
+	if($user == false) {
         $response->setStatusCode(404, "Not Found");
 	    $response->setJsonContent(
 	    array(
@@ -785,7 +786,6 @@ $app->post('/api/user/login', function ($id) use ($app) {
 	    );
 	}
 	else {
-        $user = $users->getFirst();
         $response->setStatusCode(200, "Success");
         $response->setJsonContent(
             array(

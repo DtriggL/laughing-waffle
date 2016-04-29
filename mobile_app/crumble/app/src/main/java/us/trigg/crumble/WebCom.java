@@ -3,6 +3,7 @@ package us.trigg.crumble;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -18,12 +19,14 @@ import static us.trigg.crumble.WebConstants.OnlineLogbookTableContact.*;
 import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.*;
 
 import us.trigg.crumble.fragments.NoConnectionAlertFragment;
+import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
 import us.trigg.crumble.interfaces.WebComHandler;
 
 /**
  * Created by trigglatour on 4/27/16.
  */
 public class WebCom {
+    public static final String TAG = "WebCom";
     private WebComHandler webComHandler;
     private Context context;
 
@@ -61,6 +64,7 @@ public class WebCom {
         params.add(new BasicNameValuePair(COLUMN_USERNAME, username));
         params.add(new BasicNameValuePair(COLUMN_USER_PASSWORD, password));
 
+        Log.v(TAG, "Password is: " + password);
         WebRequest request = new WebRequest(URL_USER_LOGIN, "POST", params);
         request.showProgressDialog(true);
         request.execute(null, null, null);
@@ -146,7 +150,7 @@ public class WebCom {
 
     //-----------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------
-    private class WebRequest extends AsyncTask<String, String, String> {
+    private class WebRequest extends AsyncTask<String, String, String> implements MyFragmentDialogInterface {
 
         private String url;
         private String method;
@@ -207,8 +211,8 @@ public class WebCom {
             } catch (Exception e) {
                 // There's not an internet connection
                 // Throw up a dialog that lets the user retry
-                alert = new NoConnectionAlertFragment();
-                alert.show(webComHandler.getFragmentManager(),"Alert Dialog");
+//                alert = new NoConnectionAlertFragment();
+//                alert.show(webComHandler.getMyFragmentManager(),"Alert Dialog");
 
             }
             return null;
@@ -261,6 +265,16 @@ public class WebCom {
             } else if (url.compareTo(URL_ADD_CRUMB) == 0) {
                 webComHandler.onAddCrumb(json);
             }
+        }
+
+        @Override
+        public void doPositiveClick() {
+            //alert.dismiss();
+        }
+
+        @Override
+        public void doNegativeClick() {
+
         }
     }
 }

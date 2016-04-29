@@ -3,6 +3,7 @@ package us.trigg.crumble;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -63,7 +64,6 @@ import java.util.Locale;
 
 import us.trigg.crumble.fragments.LogbookFragment;
 import us.trigg.crumble.fragments.LoginFragment;
-import us.trigg.crumble.fragments.NoConnectionAlertFragment;
 import us.trigg.crumble.fragments.PinsFragment;
 import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
 import us.trigg.crumble.interfaces.WebComHandler;
@@ -87,8 +87,8 @@ public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleMap.OnMyLocationButtonClickListener,
-        MyFragmentDialogInterface,
-        WebComHandler {
+        WebComHandler,
+        MyFragmentDialogInterface {
 
     // Constants
     public static final String EXTRA_MESSAGE = "Explore Activity";
@@ -115,8 +115,6 @@ public class MainActivity extends AppCompatActivity implements
     Compass compass;
 
     // Fragments
-    // Alert Fragment
-    private NoConnectionAlertFragment alert;
     SupportMapFragment sMapFragment;
 
     //fab
@@ -379,6 +377,11 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onAddCrumb(JSONObject json) {}
 
+    @Override
+    public android.support.v4.app.FragmentManager getMyFragmentManager(){
+        return getSupportFragmentManager();
+    }
+
     //-----------------------------------------------------------------------------------
     // Floating Action Button Visibility
     //-----------------------------------------------------------------------------------
@@ -544,7 +547,7 @@ public class MainActivity extends AppCompatActivity implements
         else if (id == R.id.nav_nearMe) { }
         else if (id == R.id.nav_login) {
             hideFloatingActionButton();
-            fm.beginTransaction().replace(R.id.frag_manager_frame, new us.trigg.crumble.fragments.LoginFragment()).commit();
+            fm.beginTransaction().replace(R.id.frag_manager_frame, new LoginFragment()).commit();
         }
         else if (id == R.id.nav_share) { }
 
@@ -555,13 +558,16 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     //-----------------------------------------------------------------------------------
-    // Alert Dialog Handlers
+    // Dialog Event Handlers
     //-----------------------------------------------------------------------------------
     @Override
     public void doPositiveClick() {
-        // Hide the alert
-        alert.dismiss();
-        // Retry
+
+    }
+
+    @Override
+    public void doNegativeClick() {
+
     }
 
     //-----------------------------------------------------------------------------------
@@ -770,6 +776,8 @@ public class MainActivity extends AppCompatActivity implements
                     Toast.LENGTH_LONG).show();
         }
     }
+
+
 
     //-----------------------------------------------------------------------------------
     // Private Classes
