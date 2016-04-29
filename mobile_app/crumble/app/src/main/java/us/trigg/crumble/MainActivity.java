@@ -1,6 +1,10 @@
 package us.trigg.crumble;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -65,7 +69,6 @@ import java.util.Locale;
 
 import us.trigg.crumble.fragments.LogbookFragment;
 import us.trigg.crumble.fragments.LoginFragment;
-import us.trigg.crumble.fragments.NoConnectionAlertFragment;
 import us.trigg.crumble.fragments.PinsFragment;
 import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
 import us.trigg.crumble.interfaces.WebComHandler;
@@ -89,8 +92,8 @@ public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleMap.OnMyLocationButtonClickListener,
-        MyFragmentDialogInterface,
-        WebComHandler {
+        WebComHandler,
+        MyFragmentDialogInterface {
 
     // Constants
     public static final String TAG = "Main Activity";
@@ -116,12 +119,11 @@ public class MainActivity extends AppCompatActivity implements
     Compass compass;
 
     // Fragments
-    // Alert Fragment
-    private NoConnectionAlertFragment alert;
-    public SupportMapFragment sMapFragment;
+    SupportMapFragment sMapFragment;
 
     //fab
     private FloatingActionButton fab;
+    private FloatingActionButton stop_fab;
 
     // Web Communications Module
     WebCom myWebCom;
@@ -161,8 +163,8 @@ public class MainActivity extends AppCompatActivity implements
 
         FontsOverride.setDefaultFont(this, "DEFAULT", "lobster.otf");
 
-        sharedPreferences = this.getSharedPreferences(
-                getString(R.string.), Context.MODE_PRIVATE);
+        //sharedPreferences = this.getSharedPreferences(
+          //      getString(R.string.), Context.MODE_PRIVATE);
 
         // Setup the view elements
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -390,6 +392,11 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onAddCrumb(JSONObject json) {}
 
+    @Override
+    public android.support.v4.app.FragmentManager getMyFragmentManager(){
+        return getSupportFragmentManager();
+    }
+
     //-----------------------------------------------------------------------------------
     // Floating Action Button Visibility
     //-----------------------------------------------------------------------------------
@@ -532,12 +539,14 @@ public class MainActivity extends AppCompatActivity implements
             sFm.beginTransaction().hide(sMapFragment).commit();
         if (id != R.id.nav_explore) {
             hideHUD();
+            stop_fab.hide();
         }
 
         if (id == R.id.nav_explore) {
             showFloatingActionButton();
             if (routed) {
                 showHUD();
+                stop_fab.show();
             }
             //The first time, map fragment needs to be added. After that, it just needs to be shown.
             if (!sMapFragment.isAdded())
@@ -557,7 +566,7 @@ public class MainActivity extends AppCompatActivity implements
         else if (id == R.id.nav_login) {
             hideFloatingActionButton();
             toolbar.setBackground(getResources().getDrawable(R.drawable.stars));
-            fm.beginTransaction().replace(R.id.frag_manager_frame, new us.trigg.crumble.fragments.LoginFragment()).commit();
+            fm.beginTransaction().replace(R.id.frag_manager_frame, new LoginFragment()).commit();
         }
         else if (id == R.id.nav_share) { }
 
@@ -568,13 +577,16 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     //-----------------------------------------------------------------------------------
-    // Alert Dialog Handlers
+    // Dialog Event Handlers
     //-----------------------------------------------------------------------------------
     @Override
     public void doPositiveClick() {
-        // Hide the alert
-        alert.dismiss();
-        // Retry
+
+    }
+
+    @Override
+    public void doNegativeClick() {
+
     }
 
     //-----------------------------------------------------------------------------------
@@ -604,6 +616,15 @@ public class MainActivity extends AppCompatActivity implements
     //-----------------------------------------------------------------------------------
     private void setupFAB() {
         fab = (FloatingActionButton) findViewById(R.id.fab);
+        stop_fab = (FloatingActionButton) findViewById(R.id.stop_fab);
+        stop_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                endRoute();
+                stop_fab.hide();
+            }
+        });
+        stop_fab.hide();
         setFloatingActionButtonFunction(FAB_ADD);
         fab.show();
     }
@@ -664,6 +685,8 @@ public class MainActivity extends AppCompatActivity implements
                 .add(toCrumb.getPosition(), userPosition)
                 .color(R.color.route_purple)
         );
+        // Show the stop fab
+        stop_fab.show();
     }
 
     //-----------------------------------------------------------------------------------
@@ -671,6 +694,7 @@ public class MainActivity extends AppCompatActivity implements
     private void endRoute() {
         routed = false;
         toCrumb = null;
+        hideHUD();
         routeLine.remove();
     }
 
@@ -784,6 +808,8 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+
+
     //-----------------------------------------------------------------------------------
     // Private Classes
     //-----------------------------------------------------------------------------------
@@ -894,7 +920,7 @@ public class MainActivity extends AppCompatActivity implements
                 alert1.setIcon(getResources().getDrawable(R.drawable.side_nav_bar));
                 alert1.setNegativeButton("Back to adventure", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        myWebCom.findCrumb(, toCrumb.getCrumb_id());
+                    //    myWebCom.findCrumb(, toCrumb.getCrumb_id());
                     }
                 });
                 alert1.setView(image);

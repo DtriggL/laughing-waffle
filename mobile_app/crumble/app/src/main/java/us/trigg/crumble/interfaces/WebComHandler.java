@@ -23,5 +23,5 @@ public abstract interface WebComHandler {
     public void onFindCrumb(JSONObject json);
     public void onGetCrumb(JSONObject json);
     public void onAddCrumb(JSONObject json);
-    public android.app.FragmentManager getFragmentManager();
+    public android.support.v4.app.FragmentManager getMyFragmentManager();
 }

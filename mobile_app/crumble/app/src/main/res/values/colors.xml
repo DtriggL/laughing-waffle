@@ -13,4 +13,5 @@
     <color name="colorGreen">#007200</color>
     <color name="colorDarkGreen">#004F00</color>
     <color name="darkerTeal">#00FFCC</color>
+    <color name="red">#FF0000</color>
 </resources>
