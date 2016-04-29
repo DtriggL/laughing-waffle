@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/side_nav_bar"
+    >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center">
+
+        <TextView
+            android:id="@+id/pin_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/default_pin_title"
+            android:textSize="30dp"
+            android:layout_gravity="center"
+            android:gravity="center"/>
+
+        <TextView
+            android:id="@+id/pin_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/default_pin_content"
+            android:textSize="30dp"
+            android:layout_gravity="center"
+            android:gravity="center"/>
+
+        <Button
+            android:id="@+id/done_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/pin_content_done"
+            android:onClick="endFragment"
+            android:layout_gravity="right"/>
+
+    </LinearLayout>
+
+</FrameLayout>

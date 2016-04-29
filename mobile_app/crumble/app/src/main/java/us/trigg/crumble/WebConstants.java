@@ -32,20 +32,24 @@ public class WebConstants {
     public static final String STATUS_TAG = "status";
     public static final String PAYLOAD_TAG = "data";
 
+    // JSON Status Field Values
+    public static final String STATUS_FOUND = "FOUND";
+    public static final String STATUS_NOT_FOUND = "NOT-FOUND";
+
     public static class OnlineCrumbTableContact {
         private OnlineCrumbTableContact() {}
 
         // COLUMNS
-        public static final String COLUMN_CRUMB_ID = "crumb_id";
-        public static final String COLUMN_TITLE = "title";
-        public static final String COLUMN_LATITUDE = "latitude";
+        public static final String COLUMN_CRUMB_ID  = "crumb_id";
+        public static final String COLUMN_LATITUDE  = "latitude";
         public static final String COLUMN_LONGITUDE = "longitude";
-        public static final String COLUMN_CREATION_DATE = "creation_date";
-        public static final String COLUMN_MESSAGE = "message";
-        public static final String COLUMN_CREATOR_ID = "creator_id";
         public static final String COLUMN_TOTAL_DISCOVERED = "total_discovered";
         public static final String COLUMN_RATING = "rating";
         public static final String COLUMN_RATINGS = "ratings";
+        public static final String COLUMN_TITLE = "title";
+        public static final String COLUMN_MESSAGE = "message";
+        public static final String COLUMN_CREATOR_ID = "creator_id";
+        public static final String COLUMN_CREATE_DATE = "creation_date";
 
     }
 
@@ -58,6 +62,7 @@ public class WebConstants {
         public static final String COLUMN_FIRST_NAME = "first_name";
         public static final String COLUMN_LAST_NAME = "last_name";
         public static final String COLUMN_EMAIL = "email";
+        public static final String COLUMN_USER_ID = "user_id";
     }
 
     public static class OnlineLogbookTableContact {

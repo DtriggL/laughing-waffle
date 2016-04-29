@@ -26,6 +26,41 @@
         android:layout_height="match_parent">
     </FrameLayout>
 
+    <!--  Get Crumb content to display on map
+            <LinearLayout
+                android:id="@+id/crumb_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/hud_titles"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/pin_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/default_pin_title"
+                    android:textSize="30dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"/>
+
+                <TextView
+                    android:id="@+id/pin_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/default_pin_content"
+                    android:textSize="15dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"/>
+
+                <Button
+                    android:id="@+id/done_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pin_content_done"
+                    android:onClick="endFragment" />
+
+            </LinearLayout>
+    -->
 
     <!-- These elements are used for "HUD" field titles -->
     <LinearLayout

@@ -1,7 +1,8 @@
 package us.trigg.crumble.fragments;
 
 
-import android.app.FragmentManager;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -24,14 +25,16 @@ import us.trigg.crumble.WebCom;
 import us.trigg.crumble.WebConstants;
 import us.trigg.crumble.interfaces.WebComHandler;
 
+
+
 import static us.trigg.crumble.WebConstants.PAYLOAD_TAG;
 
 public class TabFragment1 extends Fragment implements WebComHandler {
 
     //private SQLiteAdapter mySQLiteAdapter;
-    ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String,String>>();
+    private ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String,String>>();
+    private ListView listView;
 
-    ListView listView;
 
     public TabFragment1(){}
 
@@ -53,9 +56,17 @@ public class TabFragment1 extends Fragment implements WebComHandler {
         temp.put("Fourth", "Rating");
         list.add(temp);
 
+        SharedPreferences sharedPreferences = getActivity()
+                .getSharedPreferences(getString(R.string.SharedPreferencesKey), Context.MODE_PRIVATE);
+
+        int u_id = sharedPreferences.getInt("user_id", 0);
+
+
         WebComHandler wcHandler = this;
         WebCom wc = new WebCom(wcHandler, this.getContext());
-        wc.getOwnedCrumbs(1);
+        wc.getOwnedCrumbs(u_id);
+
+        //Log.d("USER_ID", Integer.toString(u_id));
 
        /* listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
@@ -76,7 +87,7 @@ public class TabFragment1 extends Fragment implements WebComHandler {
 
 
 
-       // ListViewAdapter adapter=new ListViewAdapter(getActivity(), list);
+        // ListViewAdapter adapter=new ListViewAdapter(getActivity(), list);
         //listView.setAdapter(adapter);
 
 
@@ -128,56 +139,56 @@ public class TabFragment1 extends Fragment implements WebComHandler {
         try {
             data = json.getJSONArray(PAYLOAD_TAG);
 
-        for (int i = 0; i < data.length(); i++) {
-            JSONObject mJSONCrumb = data.getJSONObject(i);
-            Crumb crumb = new Crumb();
+            for (int i = 0; i < data.length(); i++) {
+                JSONObject mJSONCrumb = data.getJSONObject(i);
+                Crumb crumb = new Crumb();
 
-            String title = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_TITLE);
-            String lat = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_LATITUDE);
-            String lng = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_LONGITUDE);
-            int crumb_id = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_CRUMB_ID);
-            //String date = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_CREATION_DATE);
-            //String message = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_MESSAGE);
-           // int creator_id = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_CREATOR_ID);
-            //int ratings = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_RATINGS);
-            int total = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_TOTAL_DISCOVERED);
-            Float rating = Float.parseFloat(mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_RATING));
+                String title = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_TITLE);
+                String lat = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_LATITUDE);
+                String lng = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_LONGITUDE);
+                int crumb_id = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_CRUMB_ID);
+                //String date = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_CREATION_DATE);
+                //String message = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_MESSAGE);
+                // int creator_id = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_CREATOR_ID);
+                //int ratings = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_RATINGS);
+                int total = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_TOTAL_DISCOVERED);
+                Float rating = Float.parseFloat(mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_RATING));
 
-            if(title != null)
-                crumb.setTitle(title);
-            if(lat != null)
-                crumb.setLatitude(lat);
-            if(lng != null)
-                crumb.setLongitude(lng);
-            if(crumb_id >= 0)
-                crumb.setCrumbID(crumb_id);
-            //if(date != null)
-            //    crumb.setCreationDate(date);
-            //if(message != null)
-            //    crumb.setMessage(message);
-            //if(creator_id >= 0)
-            //    crumb.setCreatorID(creator_id);
-            //if(ratings >= 0.0)
-            //    crumb.setRatings(ratings);
-            if(total >= 0)
-                crumb.setTotalDiscovered(total);
-            if(rating >= 0.0)
-                crumb.setRating(rating);
+                if(title != null)
+                    crumb.setTitle(title);
+                /*if(lat != null)
+                    crumb.setLatitude(lat);
+                if(lng != null)
+                    crumb.setLongitude(lng);
+                if(crumb_id >= 0)
+                    crumb.setCrumbID(crumb_id);
+                if(date != null)
+                    crumb.setCreationDate(date);
+                if(message != null)
+                    crumb.setMessage(message);
+                if(creator_id >= 0)
+                    crumb.setCreatorID(creator_id);
+                if(ratings >= 0.0)
+                    crumb.setRatings(ratings);*/
+                if(total >= 0)
+                    crumb.setTotalDiscovered(total);
+                if(rating >= 0.0)
+                    crumb.setRating(rating);
 
 
-            Log.d("LIST2", Integer.toString(list.size()));
+                Log.d("LIST2", Integer.toString(list.size()));
 
-            HashMap<String,String> temp2 = new HashMap<>();
-            temp2.put("First", title);
-            temp2.put("Second", Integer.toString(total));
-            temp2.put("Fourth", Float.toString(rating));
-            list.add(temp2);
+                HashMap<String,String> temp2 = new HashMap<>();
+                temp2.put("First", title);
+                temp2.put("Second", Integer.toString(total));
+                temp2.put("Fourth", Float.toString(rating));
+                list.add(temp2);
 
-            ListViewAdapter adapter = new ListViewAdapter(getActivity(), list);
-            listView.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
+                ListViewAdapter adapter = new ListViewAdapter(getActivity(), list);
+                listView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
 
-        }
+            }
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -239,7 +250,8 @@ public class TabFragment1 extends Fragment implements WebComHandler {
     }
 
     @Override
-    public FragmentManager getMyFragmentManager() {
+    public android.support.v4.app.FragmentManager getMyFragmentManager() {
         return null;
     }
+
 }

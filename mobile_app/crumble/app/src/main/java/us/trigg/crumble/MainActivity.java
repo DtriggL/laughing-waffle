@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -24,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,10 +61,10 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import us.trigg.crumble.fragments.LogbookFragment;
 import us.trigg.crumble.fragments.LoginFragment;
-import us.trigg.crumble.fragments.NoConnectionAlertFragment;
 import us.trigg.crumble.fragments.PinsFragment;
 import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
 import us.trigg.crumble.interfaces.WebComHandler;
@@ -73,11 +75,12 @@ import static us.trigg.crumble.WebConstants.STATUS_TAG;
 
 // TODO:
 // 1. (DONE) Fix server code to send right information
-// 2. Update the HUD correctly
+// 2. (DONE) Update the HUD correctly
 // 3. Be able to stop a route
 // 4. (DONE) Don't want to be able to route to multiple crumbs
 // 5. Download crumb content when routed to it
 // 6. (DONE) Don't want crumb that you're routed to to be clustered
+// 7. Login
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
@@ -85,23 +88,22 @@ public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleMap.OnMyLocationButtonClickListener,
-        MyFragmentDialogInterface,
-        WebComHandler {
+        WebComHandler,
+        MyFragmentDialogInterface {
 
     // Constants
-    public static final String EXTRA_MESSAGE = "Explore Activity";
     public static final String TAG = "Main Activity";
     public static final int FAB_GO = 1;
     public static final int FAB_ADD = 0;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-    public static final float DISTANCE_REQUIRED = 10; // Distance in meters
+    public static final float DISTANCE_REQUIRED = 40; // Distance in meters
 
     private ClusterManager<Crumb> mClusterManager;
     private MyClusterRender mClusterRenderer;
 
     private GoogleMap mMap;
 
-    // Locaiton API client
+    // Location API client
     protected GoogleApiClient mGoogleApiClient;
     // Location Request
     protected LocationRequest mLocationRequest;
@@ -109,13 +111,15 @@ public class MainActivity extends AppCompatActivity implements
     // Location
     protected Location mCurrentLocation;
 
+    // Sensor Variables
+    Compass compass;
+
     // Fragments
-    // Alert Fragment
-    private NoConnectionAlertFragment alert;
     SupportMapFragment sMapFragment;
 
     //fab
     private FloatingActionButton fab;
+    private FloatingActionButton stop_fab;
 
     // Web Communications Module
     WebCom myWebCom;
@@ -131,6 +135,15 @@ public class MainActivity extends AppCompatActivity implements
     Crumb selectedCrumb;
     boolean routed;
     Polyline routeLine;
+
+    //alert dialog showing discovered crumb info map boolean
+    boolean alert1Showing;
+
+    //check if logged in
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
+    boolean loggedIn;
+    int userId;
 
     //-----------------------------------------------------------------------------------
     // Life-cycle Event Handlers
@@ -148,6 +161,12 @@ public class MainActivity extends AppCompatActivity implements
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        FontsOverride.setDefaultFont(this, "DEFAULT", "lobster.otf");
+
+        //Check if user is logged in
+        sharedPreferences = this.getSharedPreferences(
+                getString(R.string.SharedPreferencesKey), Context.MODE_PRIVATE);
+
         // Setup the view elements
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -163,6 +182,9 @@ public class MainActivity extends AppCompatActivity implements
 
         // Web Communications Module Initialization
         myWebCom = new WebCom(this, this);
+
+        // Compass Instantiation
+        compass = new Compass(this);
 
         android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
         sFm.beginTransaction().add(R.id.map, sMapFragment).commit();
@@ -235,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements
         mMap = googleMap;
 
         // Set up the map padding
-        mMap.setPadding(0, 60, 0, 0);
+        mMap.setPadding(0, 200, 0, 0);
 
         setUpClusterer();
 
@@ -347,20 +369,33 @@ public class MainActivity extends AppCompatActivity implements
     public void onGetUserLogbook(JSONObject json) {}
 
     @Override
-    public void onAddLogbookEntry(JSONObject josn) {}
+    public void onAddLogbookEntry(JSONObject json) {}
 
     @Override
-    public void onFindCrumb(JSONObject json) {}
+    public void onFindCrumb(JSONObject json) {
+
+    }
 
     @Override
-    public void onGetCrumb(JSONObject json) {}
+    public void onGetCrumb(JSONObject json) {
+        // Use the JSON crumb to set the crumb details
+        try {
+            // If the crumb was found by the server
+            if (json.getString(STATUS_TAG).compareTo("FOUND") == 0) {
+                // Add the rest of the data to the crumb
+                toCrumb.setByJson(json.getJSONObject(PAYLOAD_TAG));
+            }
+        } catch (JSONException e) {
+            Log.v(TAG, "Unable to set toCrumb from server results.");
+        }
+    }
 
     @Override
     public void onAddCrumb(JSONObject json) {}
 
     @Override
-    public android.app.FragmentManager getMyFragmentManager() {
-        return null;
+    public android.support.v4.app.FragmentManager getMyFragmentManager(){
+        return getSupportFragmentManager();
     }
 
     //-----------------------------------------------------------------------------------
@@ -397,53 +432,66 @@ public class MainActivity extends AppCompatActivity implements
                 fab.setImageDrawable(add_icon);
                 // Set the on click
                 fab.setOnClickListener(new View.OnClickListener() {
+
                     @Override
                     public void onClick(View view) {
 
-                        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                        if (loggedIn) {
+                            AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
 
-                        LinearLayout layout = new LinearLayout(MainActivity.this);
-                        layout.setOrientation(LinearLayout.VERTICAL);
+                            LinearLayout layout = new LinearLayout(MainActivity.this);
+                            layout.setOrientation(LinearLayout.VERTICAL);
 
-                        final EditText titleBox = new EditText(MainActivity.this);
-                        titleBox.setHint("Crumb Title");
-                        layout.addView(titleBox);
+                            final EditText titleBox = new EditText(MainActivity.this);
+                            titleBox.setHint("Crumb Title");
+                            layout.addView(titleBox);
 
-                        final EditText contentBox = new EditText(MainActivity.this);
-                        contentBox.setHint("Crumb Message");
-                        layout.addView(contentBox);
+                            final EditText contentBox = new EditText(MainActivity.this);
+                            contentBox.setHint("Crumb Message");
+                            layout.addView(contentBox);
 
-                        alert.setTitle("Add Crumb");
-                        //alert.setMessage("Message");
+                            alert.setTitle("Add Crumb");
+                            //alert.setMessage("Message");
 
-                        alert.setView(layout);
+                            alert.setView(layout);
 
-                        alert.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                //insert crumb with title=stringTitle and message=stringContent
-                                if(mCurrentLocation != null) {
-                                    String stringTitle = titleBox.getText().toString();
-                                    String stringContent = contentBox.getText().toString();
-                                    String lat = Double.toString(mCurrentLocation.getLatitude());
-                                    String lng = Double.toString(mCurrentLocation.getLongitude());
+                            alert.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    //insert crumb with title=stringTitle and message=stringContent
+                                    if (mCurrentLocation != null) {
+                                        String stringTitle = titleBox.getText().toString();
+                                        String stringContent = contentBox.getText().toString();
+                                        String lat = Double.toString(mCurrentLocation.getLatitude());
+                                        String lng = Double.toString(mCurrentLocation.getLongitude());
 
-                                    new CreateNewCrumb().execute(stringTitle, stringContent, lat, lng);
+                                        sharedPreferences = getSharedPreferences(getString(R.string.SharedPreferencesKey), Context.MODE_PRIVATE);
+
+                                        int u_id = sharedPreferences.getInt("user_id", 0);
+
+                                        myWebCom.addCrumb(u_id, stringTitle, lat,
+                                                lng, stringContent);
+
+
+                                        //new CreateNewCrumb().execute(stringTitle, stringContent, lat, lng);
+                                    } else {
+                                        Log.d(TAG, "Location null in FAB onClick");
+                                        Toast.makeText(getParent(), "No location determined. Make sure location service is enabled", Toast.LENGTH_LONG).show();
+                                    }
+
                                 }
-                                else{
-                                    Log.d(TAG, "Location null in FAB onClick");
-                                    Toast.makeText(getParent(), "No location determined. Make sure location service is enabled", Toast.LENGTH_LONG).show();
+                            });
+
+                            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    // Canceled.
                                 }
+                            });
 
-                            }
-                        });
-
-                        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                // Canceled.
-                            }
-                        });
-
-                        alert.show();
+                            alert.show();
+                        }
+                        else {
+                            Toast.makeText(MainActivity.this, "Not Logged In", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
                 break;
@@ -493,22 +541,36 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
 
+        //Check if logged in every time we move out of logged in fragment
+        if (sharedPreferences.contains(getString(R.string.stored_user_id))) {
+            Log.d(TAG, "checked shared preferences and user id exists");
+            userId = sharedPreferences.getInt(getString(R.string.stored_user_id), 0);
+            loggedIn = true;
+        }
+        else {
+            loggedIn = false;
+        }
+
         FragmentManager fm = getSupportFragmentManager();
         android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
 
-        int id = item.getItemId();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setBackground(getResources().getDrawable(R.drawable.side_nav_bar));
 
+        int id = item.getItemId();
         //On every menu button click, the map fragment get's hidden
         if (sMapFragment.isAdded())
             sFm.beginTransaction().hide(sMapFragment).commit();
         if (id != R.id.nav_explore) {
             hideHUD();
+            stop_fab.hide();
         }
 
         if (id == R.id.nav_explore) {
             showFloatingActionButton();
             if (routed) {
                 showHUD();
+                stop_fab.show();
             }
             //The first time, map fragment needs to be added. After that, it just needs to be shown.
             if (!sMapFragment.isAdded())
@@ -525,10 +587,10 @@ public class MainActivity extends AppCompatActivity implements
             hideFloatingActionButton();
             fm.beginTransaction().replace(R.id.frag_manager_frame, new PinsFragment()).commit();
         }
-        else if (id == R.id.nav_nearMe) { }
         else if (id == R.id.nav_login) {
             hideFloatingActionButton();
-            fm.beginTransaction().replace(R.id.frag_manager_frame, new us.trigg.crumble.fragments.LoginFragment()).commit();
+            toolbar.setBackground(getResources().getDrawable(R.drawable.stars));
+            fm.beginTransaction().replace(R.id.frag_manager_frame, new LoginFragment()).commit();
         }
         else if (id == R.id.nav_share) { }
 
@@ -539,13 +601,16 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     //-----------------------------------------------------------------------------------
-    // Alert Dialog Handlers
+    // Dialog Event Handlers
     //-----------------------------------------------------------------------------------
     @Override
     public void doPositiveClick() {
-        // Hide the alert
-        alert.dismiss();
-        // Retry
+
+    }
+
+    @Override
+    public void doNegativeClick() {
+
     }
 
     //-----------------------------------------------------------------------------------
@@ -575,6 +640,15 @@ public class MainActivity extends AppCompatActivity implements
     //-----------------------------------------------------------------------------------
     private void setupFAB() {
         fab = (FloatingActionButton) findViewById(R.id.fab);
+        stop_fab = (FloatingActionButton) findViewById(R.id.stop_fab);
+        stop_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                endRoute();
+                stop_fab.hide();
+            }
+        });
+        stop_fab.hide();
         setFloatingActionButtonFunction(FAB_ADD);
         fab.show();
     }
@@ -620,7 +694,8 @@ public class MainActivity extends AppCompatActivity implements
         if (marker != null) {
 
         }
-        // TODO: Download additional crumb details and save them to the crumb
+        myWebCom.getCrumb(toCrumb.getCrumb_id());
+
         routed = true;
         // Turn on the HUD
         showHUD();
@@ -634,6 +709,8 @@ public class MainActivity extends AppCompatActivity implements
                 .add(toCrumb.getPosition(), userPosition)
                 .color(R.color.route_purple)
         );
+        // Show the stop fab
+        stop_fab.show();
     }
 
     //-----------------------------------------------------------------------------------
@@ -641,6 +718,7 @@ public class MainActivity extends AppCompatActivity implements
     private void endRoute() {
         routed = false;
         toCrumb = null;
+        hideHUD();
         routeLine.remove();
     }
 
@@ -673,7 +751,7 @@ public class MainActivity extends AppCompatActivity implements
                                     crumb.setTitle(mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_TITLE));
                                     String lat = mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_LATITUDE);
                                     String longi = mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_LONGITUDE);
-                                    crumb.setCrumbID(mJSONCrumb.getInt(OnlineCrumbTableContact.COLUMN_CRUMB_ID));
+                                    crumb.setCrumb_id(mJSONCrumb.getInt(OnlineCrumbTableContact.COLUMN_CRUMB_ID));
                                     crumb.setTotalDiscovered(mJSONCrumb.getInt(OnlineCrumbTableContact.COLUMN_TOTAL_DISCOVERED));
                                     crumb.setRating(Float.parseFloat(mJSONCrumb.getString(OnlineCrumbTableContact.COLUMN_RATING)));
                                     // We will set the location of the crumb later on after we determine that these values are valid
@@ -753,6 +831,8 @@ public class MainActivity extends AppCompatActivity implements
                     Toast.LENGTH_LONG).show();
         }
     }
+
+
 
     //-----------------------------------------------------------------------------------
     // Private Classes
@@ -834,27 +914,42 @@ public class MainActivity extends AppCompatActivity implements
     //-----------------------------------------------------------------------------------
     private class MyLocationListener implements LocationListener {
 
-        @Override
+        FragmentManager fm = getSupportFragmentManager();
+        android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
+
+       @Override
         public void onLocationChanged(Location location) {
             mCurrentLocation = location;
             Log.v(TAG, "Location Updated: " + location.toString());
             updateMap();
+            updateHUD();
         }
 
         private void updateMap() {
             if (routed) {
                 // If so, call drawRoute and update distance, bearing, and altitude. drawRoute(); updateHUD();
                 // If distance is less than required, launch the crumb display fragment.
-                updateHUD();
                 drawRoute();
                 checkFound();
             }
         }
 
         private void checkFound() {
-            if (getDistanceToCrumb(mCurrentLocation, toCrumb) < DISTANCE_REQUIRED){
-                // Mark the crumb as found online
-                // Display the activity
+            if ((getDistanceToCrumb(mCurrentLocation, toCrumb) < DISTANCE_REQUIRED) && alert1Showing == false){
+                ImageView image = new ImageView(MainActivity.this);
+                image.setImageResource(R.drawable.crumb_pic);
+                final AlertDialog.Builder alert1 = new AlertDialog.Builder(MainActivity.this);
+                alert1.setTitle(toCrumb.getTitle());
+                alert1.setMessage(toCrumb.getMessage());
+                alert1.setIcon(getResources().getDrawable(R.drawable.side_nav_bar));
+                alert1.setNegativeButton("Back to adventure", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        myWebCom.findCrumb(userId, toCrumb.getCrumb_id());
+                    }
+                });
+                alert1.setView(image);
+                alert1.show();
+                alert1Showing = true;
             }
         }
         private void drawRoute() {
@@ -874,11 +969,21 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         private void updateHUD() {
-            //altitude.setText(Double.toString(mCurrentLocation.getAltitude()));
-            String alt_str = String.format("%.2f", mCurrentLocation.getAltitude());
-            altitude.setText(alt_str);
-            heading.setText(Float.toString(mCurrentLocation.getBearing()));
-            distance.setText(Float.toString(mCurrentLocation.getSpeed()));
+            // Set the altitude
+            // Convert it to feet
+            double alt = 3.28084 * mCurrentLocation.getAltitude();
+            if (alt != 0) {
+                String alt_str = String.format(Locale.ENGLISH ,"%.2f", alt);
+                altitude.setText(alt_str);
+            }
+            if (routed) {
+                if (compass.isValid()) {
+                    heading.setText(String.format(Locale.ENGLISH, "%.1f", compass.getHeading()));
+                } else {
+                    heading.setText(R.string.na);
+                }
+                distance.setText(String.format(Locale.ENGLISH, "%.0f", getDistanceToCrumb(mCurrentLocation, toCrumb)));
+            }
         }
     }
 
@@ -919,7 +1024,7 @@ public class MainActivity extends AppCompatActivity implements
 
             //building Parameters
             List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("creator_id","2"));
+            params.add(new BasicNameValuePair("creator_id","1"));
             params.add(new BasicNameValuePair("title", title));
             params.add(new BasicNameValuePair("latitude", lat));
             params.add(new BasicNameValuePair("longitude", lng));

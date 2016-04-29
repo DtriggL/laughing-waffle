@@ -1,6 +1,7 @@
 package us.trigg.crumble.fragments;
 
-import android.app.FragmentManager;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -28,9 +29,10 @@ import static us.trigg.crumble.WebConstants.PAYLOAD_TAG;
 public class TabFragment2 extends Fragment implements WebComHandler {
 
     //private SQLiteAdapter mySQLiteAdapter;
-    ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
+    private ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
+    private ListView listView;
 
-    ListView listView;
+    ;
 
     public TabFragment2() {
     }
@@ -53,9 +55,17 @@ public class TabFragment2 extends Fragment implements WebComHandler {
         temp.put("Fourth", "Rating");
         list.add(temp);
 
+        SharedPreferences sharedPreferences = getActivity()
+                .getSharedPreferences(getString(R.string.SharedPreferencesKey), Context.MODE_PRIVATE);
+
+        int u_id = sharedPreferences.getInt("user_id", 0);
+
+        Log.d("USER_ID", Integer.toString(u_id));
+
+
         WebComHandler wcHandler = this;
         WebCom wc = new WebCom(wcHandler, this.getContext());
-        wc.getFoundCrumbs(1);
+        wc.getFoundCrumbs(u_id);
 
        /* listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
@@ -154,7 +164,7 @@ public class TabFragment2 extends Fragment implements WebComHandler {
 
                 if (title != null)
                     crumb.setTitle(title);
-                if (lat != null)
+                /*if (lat != null)
                     crumb.setLatitude(lat);
                 if (lng != null)
                     crumb.setLongitude(lng);
@@ -167,7 +177,7 @@ public class TabFragment2 extends Fragment implements WebComHandler {
                 //if(creator_id >= 0)
                 //    crumb.setCreatorID(creator_id);
                 //if(ratings >= 0.0)
-                //    crumb.setRatings(ratings);
+                //    crumb.setRatings(ratings);*/
                 if (total >= 0)
                     crumb.setTotalDiscovered(total);
                 if (rating >= 0.0)
@@ -238,7 +248,8 @@ public class TabFragment2 extends Fragment implements WebComHandler {
     }
 
     @Override
-    public FragmentManager getMyFragmentManager() {
+    public android.support.v4.app.FragmentManager getMyFragmentManager() {
         return null;
     }
+
 }

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.trigg.crumble.fragments.NoConnectionAlertFragment;
+import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
 import us.trigg.crumble.interfaces.WebComHandler;
 
 import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_CREATOR_ID;
@@ -43,6 +44,7 @@ import static us.trigg.crumble.WebConstants.URL_USER_LOGIN;
  * Created by trigglatour on 4/27/16.
  */
 public class WebCom {
+    public static final String TAG = "WebCom";
     private WebComHandler webComHandler;
     private Context context;
 
@@ -68,9 +70,9 @@ public class WebCom {
     }
 
     public void getFoundCrumbs(int user_id) {
-        Log.d("TAB2", "IN FOUND CRUMBS");
         String user_id_str = Integer.toString(user_id);
         WebRequest request = new WebRequest(URL_GET_USER_FOUND_CRUMBS + user_id_str, "GET", null);
+        Log.d("GETFOUNDCRUMB", URL_GET_USER_FOUND_CRUMBS + user_id_str);
         request.showProgressDialog(true);
         request.execute(null, null, null);
         // Result posted to parent with onGetOwnedCrumb from the AsyncTask
@@ -81,6 +83,7 @@ public class WebCom {
         params.add(new BasicNameValuePair(COLUMN_USERNAME, username));
         params.add(new BasicNameValuePair(COLUMN_USER_PASSWORD, password));
 
+        Log.v(TAG, "Password is: " + password);
         WebRequest request = new WebRequest(URL_USER_LOGIN, "POST", params);
         request.showProgressDialog(true);
         request.execute(null, null, null);
@@ -166,7 +169,7 @@ public class WebCom {
 
     //-----------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------
-    private class WebRequest extends AsyncTask<String, String, String> {
+    private class WebRequest extends AsyncTask<String, String, String> implements MyFragmentDialogInterface {
 
         private String url;
         private String method;
@@ -227,8 +230,8 @@ public class WebCom {
             } catch (Exception e) {
                 // There's not an internet connection
                 // Throw up a dialog that lets the user retry
-                alert = new NoConnectionAlertFragment();
-                alert.show(webComHandler.getMyFragmentManager(),"Alert Dialog");
+//                alert = new NoConnectionAlertFragment();
+//                alert.show(webComHandler.getMyFragmentManager(),"Alert Dialog");
 
             }
             return null;
@@ -245,6 +248,7 @@ public class WebCom {
                     /**
                      * Call function in UI thread to update the  map
                      * */
+
                     postResult(mJson, url);
                 }
             }).run();
@@ -259,11 +263,11 @@ public class WebCom {
         // Posts the result to the correct result handler depending on the URL selected.
         //-----------------------------------------------------------------------------------
         protected void postResult(JSONObject json, String url) {
-            if (url.compareTo(URL_GET_USER_CREATED_CRUMBS+"1") == 0) {
+            if (url.compareTo(URL_GET_USER_CREATED_CRUMBS) == 1) {
                 webComHandler.onGetOwnedCrumbs(json);
             } else if (url.compareTo(URL_ALL_CRUMBS) == 0) {
                 webComHandler.onGetAllCrumbs(json);
-            } else if (url.compareTo(URL_GET_USER_FOUND_CRUMBS+"1") == 0) {
+            }  if (url.compareTo(URL_GET_USER_FOUND_CRUMBS) == 1) {
                 webComHandler.onGetFoundCrumbs(json);
             } else if (url.compareTo(URL_USER_LOGIN) == 0) {
                 webComHandler.onUserLogin(json);
@@ -280,6 +284,16 @@ public class WebCom {
             } else if (url.compareTo(URL_ADD_CRUMB) == 0) {
                 webComHandler.onAddCrumb(json);
             }
+        }
+
+        @Override
+        public void doPositiveClick() {
+            //alert.dismiss();
+        }
+
+        @Override
+        public void doNegativeClick() {
+
         }
     }
 }
