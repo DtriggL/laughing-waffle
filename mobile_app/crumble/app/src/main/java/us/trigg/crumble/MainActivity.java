@@ -63,6 +63,7 @@ import java.util.List;
 import us.trigg.crumble.fragments.LogbookFragment;
 import us.trigg.crumble.fragments.LoginFragment;
 import us.trigg.crumble.fragments.NoConnectionAlertFragment;
+import us.trigg.crumble.fragments.CrumbContentFragment;
 import us.trigg.crumble.fragments.PinsFragment;
 import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
 import us.trigg.crumble.interfaces.WebComHandler;
@@ -352,7 +353,9 @@ public class MainActivity extends AppCompatActivity implements
     public void onAddLogbookEntry(JSONObject josn) {}
 
     @Override
-    public void onFindCrumb(JSONObject json) {}
+    public void onFindCrumb(JSONObject json) {
+
+    }
 
     @Override
     public void onGetCrumb(JSONObject json) {}
@@ -493,8 +496,10 @@ public class MainActivity extends AppCompatActivity implements
         FragmentManager fm = getSupportFragmentManager();
         android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
 
-        int id = item.getItemId();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setBackground(getResources().getDrawable(R.drawable.side_nav_bar));
 
+        int id = item.getItemId();
         //On every menu button click, the map fragment get's hidden
         if (sMapFragment.isAdded())
             sFm.beginTransaction().hide(sMapFragment).commit();
@@ -522,9 +527,9 @@ public class MainActivity extends AppCompatActivity implements
             hideFloatingActionButton();
             fm.beginTransaction().replace(R.id.frag_manager_frame, new PinsFragment()).commit();
         }
-        else if (id == R.id.nav_nearMe) { }
         else if (id == R.id.nav_login) {
             hideFloatingActionButton();
+            toolbar.setBackground(getResources().getDrawable(R.drawable.stars));
             fm.beginTransaction().replace(R.id.frag_manager_frame, new us.trigg.crumble.fragments.LoginFragment()).commit();
         }
         else if (id == R.id.nav_share) { }
@@ -831,6 +836,8 @@ public class MainActivity extends AppCompatActivity implements
     //-----------------------------------------------------------------------------------
     private class MyLocationListener implements LocationListener {
 
+        FragmentManager fm = getSupportFragmentManager();
+
         @Override
         public void onLocationChanged(Location location) {
             mCurrentLocation = location;
@@ -850,8 +857,7 @@ public class MainActivity extends AppCompatActivity implements
 
         private void checkFound() {
             if (getDistanceToCrumb(mCurrentLocation, toCrumb) < DISTANCE_REQUIRED){
-                // Mark the crumb as found online
-                // Display the activity
+                fm.beginTransaction().replace(R.id.frag_manager_frame, new CrumbContentFragment()).commit();
             }
         }
         private void drawRoute() {

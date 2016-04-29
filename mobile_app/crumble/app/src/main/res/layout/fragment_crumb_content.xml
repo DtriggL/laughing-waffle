@@ -2,13 +2,14 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/side_nav_bar"
+    >
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/side_nav_bar"
         android:layout_gravity="center">
 
         <TextView
@@ -30,9 +31,11 @@
             android:gravity="center"/>
 
         <Button
+            android:id="@+id/done_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/pin_content_done"
+            android:onClick="endFragment"
             android:layout_gravity="right"/>
 
     </LinearLayout>

@@ -1,6 +1,5 @@
 package us.trigg.crumble;
 
-import android.hardware.camera2.TotalCaptureResult;
 import android.location.Location;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -41,12 +40,17 @@ public class Crumb implements ClusterItem {
     public LatLng getPosition() {
         return new LatLng(Location.convert(latitude), Location.convert(longitude));
     }
+
+    public String getMessage() {return message;}
+
     public String getTitle(){
         return title;
     }
+
     public int getTotalDiscovered() {
         return totalDiscovered;
     }
+
     public float getRating() {
         return rating;
     }
@@ -54,19 +58,20 @@ public class Crumb implements ClusterItem {
     //-----------------------------------------------------------------
     // Setters
     //-----------------------------------------------------------------
-    public void setTitle(String t) {
-        title = t;
-    }
-    public void setLocation(String lat, String longi) {
-        latitude = lat;
-        longitude = longi;
-    }
+    public void setTitle(String t) { title = t; }
+
+    public void setMessage(String m) { message = m; }
+
+    public void setLocation(String lat, String lng) { latitude = lat; longitude = lng; }
+
     public void setCrumb_id(int id) {
         crumb_id = id;
     }
+
     public void setTotalDiscovered(int td) {
         totalDiscovered = td;
     }
+
     public void setRating(float r) {
         rating = r;
     }

@@ -24,7 +24,6 @@ public class TabFragment2 extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.tab_fragment_2, container, false);
 
-
         listContent = (ListView) view.findViewById(R.id.list_myPins);
 
         return view;

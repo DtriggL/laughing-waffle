@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/side_nav_bar">
+    android:background="@drawable/stars">
 
     <pl.droidsonroids.gif.GifTextView
         android:layout_width="327dp"
@@ -25,7 +25,8 @@
             android:layout_height="wrap_content"
             android:text="@string/title_activity_login"
             android:textSize="30dp"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:gravity="center"/>
 
         <EditText
             android:id="@+id/username"

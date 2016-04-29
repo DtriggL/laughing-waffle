@@ -66,7 +66,7 @@ public class TabFragment1 extends Fragment {
                 "You can always find a massive school here.");
         temp3.put("Third", "2");
         temp3.put("Fourth", "4/10/16");
-        list.add(temp3);
+        list.add(temp4);
 
         HashMap<String,String> temp5=new HashMap<String, String>();
         temp3.put("First", "Biker's Ultimate Challenge Course");
@@ -76,7 +76,7 @@ public class TabFragment1 extends Fragment {
                 "a fantastic view!");
         temp3.put("Third", "4.2");
         temp3.put("Fourth", "3/16/16");
-        list.add(temp3);
+        list.add(temp5);
 
         ListViewAdapter adapter=new ListViewAdapter(getActivity(), list);
         listView.setAdapter(adapter);
