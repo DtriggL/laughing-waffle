@@ -470,7 +470,7 @@ public class MainActivity extends AppCompatActivity implements
                                         sharedPreferences = getSharedPreferences(getString(R.string.SharedPreferencesKey), Context.MODE_PRIVATE);
 
                                         int u_id = sharedPreferences.getInt("user_id", 0);
-
+                                        Log.d(TAG, "Added crumb, user_id = " + Integer.toString(u_id));
                                         myWebCom.addCrumb(u_id, stringTitle, lat,
                                                 lng, stringContent);
                                         Log.d(TAG, "the message in crumb " + stringContent);
