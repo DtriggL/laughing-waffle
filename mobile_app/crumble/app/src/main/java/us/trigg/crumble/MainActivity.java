@@ -119,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements
 
     //fab
     private FloatingActionButton fab;
+    private FloatingActionButton stop_fab;
 
     // Web Communications Module
     WebCom myWebCom;
@@ -522,12 +523,14 @@ public class MainActivity extends AppCompatActivity implements
             sFm.beginTransaction().hide(sMapFragment).commit();
         if (id != R.id.nav_explore) {
             hideHUD();
+            stop_fab.hide();
         }
 
         if (id == R.id.nav_explore) {
             showFloatingActionButton();
             if (routed) {
                 showHUD();
+                stop_fab.show();
             }
             //The first time, map fragment needs to be added. After that, it just needs to be shown.
             if (!sMapFragment.isAdded())
@@ -597,6 +600,15 @@ public class MainActivity extends AppCompatActivity implements
     //-----------------------------------------------------------------------------------
     private void setupFAB() {
         fab = (FloatingActionButton) findViewById(R.id.fab);
+        stop_fab = (FloatingActionButton) findViewById(R.id.stop_fab);
+        stop_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                endRoute();
+                stop_fab.hide();
+            }
+        });
+        stop_fab.hide();
         setFloatingActionButtonFunction(FAB_ADD);
         fab.show();
     }
@@ -657,6 +669,8 @@ public class MainActivity extends AppCompatActivity implements
                 .add(toCrumb.getPosition(), userPosition)
                 .color(R.color.route_purple)
         );
+        // Show the stop fab
+        stop_fab.show();
     }
 
     //-----------------------------------------------------------------------------------
@@ -664,6 +678,7 @@ public class MainActivity extends AppCompatActivity implements
     private void endRoute() {
         routed = false;
         toCrumb = null;
+        hideHUD();
         routeLine.remove();
     }
 
