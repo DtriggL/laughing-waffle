@@ -1,18 +1,18 @@
 package us.trigg.crumble;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.support.v4.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -59,6 +59,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import us.trigg.crumble.fragments.LogbookFragment;
 import us.trigg.crumble.fragments.LoginFragment;
@@ -74,11 +75,12 @@ import static us.trigg.crumble.WebConstants.STATUS_TAG;
 
 // TODO:
 // 1. (DONE) Fix server code to send right information
-// 2. Update the HUD correctly
+// 2. (DONE) Update the HUD correctly
 // 3. Be able to stop a route
 // 4. (DONE) Don't want to be able to route to multiple crumbs
 // 5. Download crumb content when routed to it
 // 6. (DONE) Don't want crumb that you're routed to to be clustered
+// 7. Login
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
@@ -109,6 +111,9 @@ public class MainActivity extends AppCompatActivity implements
 
     // Location
     protected Location mCurrentLocation;
+
+    // Sensor Variables
+    Compass compass;
 
     // Fragments
     // Alert Fragment
@@ -166,6 +171,9 @@ public class MainActivity extends AppCompatActivity implements
 
         // Web Communications Module Initialization
         myWebCom = new WebCom(this, this);
+
+        // Compass Instantiation
+        compass = new Compass(this);
 
         android.support.v4.app.FragmentManager sFm = getSupportFragmentManager();
         sFm.beginTransaction().add(R.id.map, sMapFragment).commit();
@@ -358,7 +366,18 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onGetCrumb(JSONObject json) {}
+    public void onGetCrumb(JSONObject json) {
+        // Use the JSON crumb to set the crumb details
+        try {
+            // If the crumb was found by the server
+            if (json.getString(STATUS_TAG).compareTo("FOUND") == 0) {
+                // Add the rest of the data to the crumb
+                toCrumb.setByJson(json.getJSONObject(PAYLOAD_TAG));
+            }
+        } catch (JSONException e) {
+            Log.v(TAG, "Unable to set toCrumb from server results.");
+        }
+    }
 
     @Override
     public void onAddCrumb(JSONObject json) {}
@@ -622,7 +641,8 @@ public class MainActivity extends AppCompatActivity implements
         if (marker != null) {
 
         }
-        // TODO: Download additional crumb details and save them to the crumb
+        myWebCom.getCrumb(toCrumb.getCrumb_id());
+
         routed = true;
         // Turn on the HUD
         showHUD();
@@ -843,13 +863,13 @@ public class MainActivity extends AppCompatActivity implements
             mCurrentLocation = location;
             Log.v(TAG, "Location Updated: " + location.toString());
             updateMap();
+            updateHUD();
         }
 
         private void updateMap() {
             if (routed) {
                 // If so, call drawRoute and update distance, bearing, and altitude. drawRoute(); updateHUD();
                 // If distance is less than required, launch the crumb display fragment.
-                updateHUD();
                 drawRoute();
                 checkFound();
             }
@@ -877,11 +897,21 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         private void updateHUD() {
-            //altitude.setText(Double.toString(mCurrentLocation.getAltitude()));
-            String alt_str = String.format("%.2f", mCurrentLocation.getAltitude());
-            altitude.setText(alt_str);
-            heading.setText(Float.toString(mCurrentLocation.getBearing()));
-            distance.setText(Float.toString(mCurrentLocation.getSpeed()));
+            // Set the altitude
+            // Convert it to feet
+            double alt = 3.28084 * mCurrentLocation.getAltitude();
+            if (alt != 0) {
+                String alt_str = String.format(Locale.ENGLISH ,"%.2f", alt);
+                altitude.setText(alt_str);
+            }
+            if (routed) {
+                if (compass.isValid()) {
+                    heading.setText(String.format(Locale.ENGLISH, "%.1f", compass.getHeading()));
+                } else {
+                    heading.setText(R.string.na);
+                }
+                distance.setText(String.format(Locale.ENGLISH, "%.0f", getDistanceToCrumb(mCurrentLocation, toCrumb)));
+            }
         }
     }
 
