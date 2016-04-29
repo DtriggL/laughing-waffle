@@ -473,6 +473,9 @@ public class MainActivity extends AppCompatActivity implements
 
 
                                         //new CreateNewCrumb().execute(stringTitle, stringContent, lat, lng);
+
+                                        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                                        startActivity(i);
                                     } else {
                                         Log.d(TAG, "Location null in FAB onClick");
                                         Toast.makeText(getParent(), "No location determined. Make sure location service is enabled", Toast.LENGTH_LONG).show();
@@ -1045,14 +1048,14 @@ public class MainActivity extends AppCompatActivity implements
                 String success = json.optString(TAG_SUCCESS);
 
                 if (success != null) {
-                    // successfully created product
+                    // successfully created crumb
                     Intent i = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(i);
 
                     // closing this screen
                     finish();
                 } else {
-                    // failed to create product
+                    // failed to create crumb
                 }
 
 
