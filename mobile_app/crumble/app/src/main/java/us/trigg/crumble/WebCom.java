@@ -264,8 +264,8 @@ public class WebCom {
         // Posts the result to the correct result handler depending on the URL selected.
         //-----------------------------------------------------------------------------------
         protected void postResult(JSONObject json, String url) {
-            String url_user_created_crumbs = url.substring(0, url.length() - 3);
-            String url_get_crumbParsed = URL_GET_CRUMB.substring(0, URL_GET_CRUMB.length() - 3);
+            String url_user_created_crumbs = url.substring(0, url.length() - 2);
+            String url_get_crumbParsed = URL_GET_CRUMB.substring(0, URL_GET_CRUMB.length() - 2);
             Log.d(TAG, "post Result in here Manoj" + url_user_created_crumbs + " " + url_get_crumbParsed);
 
             if (url_user_created_crumbs.compareTo(URL_GET_USER_CREATED_CRUMBS) == 0) {
