@@ -31,7 +31,7 @@ import static us.trigg.crumble.WebConstants.OnlineUserTableContact.*;
 /**
  * Created by ManojSeeram on 4/11/16.
  */
-public class LoginFragment extends Fragment implements WebComHandler, View.OnClickListener{
+public class LoginFragment extends Fragment implements WebComHandler {
     //-----------------------------------------------------------------------------------
     // Constants
     //-----------------------------------------------------------------------------------
@@ -46,6 +46,7 @@ public class LoginFragment extends Fragment implements WebComHandler, View.OnCli
     private EditText usernameField;
     private EditText passwordField;
     private Button login;
+    private Button logout;
 
     private WebCom webCom;
     private SharedPreferences sharedPreferences;
@@ -60,8 +61,20 @@ public class LoginFragment extends Fragment implements WebComHandler, View.OnCli
         usernameField = (EditText) rootView.findViewById(R.id.username);
         passwordField = (EditText) rootView.findViewById(R.id.password);
         login = (Button) rootView.findViewById(R.id.login_button);
+        logout = (Button) rootView.findViewById(R.id.logout_button);
 
-        login.setOnClickListener(this);
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onLoginClicked(v);
+            }
+        });
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onLogoutClicked(v);
+            }
+        });
 
         webCom = new WebCom(LoginFragment.this, this.getContext());
         sharedPreferences = getActivity()
@@ -81,6 +94,14 @@ public class LoginFragment extends Fragment implements WebComHandler, View.OnCli
         String username = usernameField.getText().toString();
         String password = passwordField.getText().toString();
         webCom.userLogin(username, password);
+    }
+
+    public void onLogoutClicked(View v) {
+        // Remove item from shared preferences
+        editor = sharedPreferences.edit();
+        editor.remove(getString(R.string.stored_user_id));
+        editor.commit();
+        Toast.makeText(getContext(), getString(R.string.logout_successful), Toast.LENGTH_LONG).show();
     }
 
     protected void onSignupClicked(View v) {
@@ -169,15 +190,5 @@ public class LoginFragment extends Fragment implements WebComHandler, View.OnCli
     @Override
     public android.support.v4.app.FragmentManager getMyFragmentManager() {
        return getFragmentManager();
-    }
-
-    //-----------------------------------------------------------------------------------
-    // Onclick event handlers
-    //-----------------------------------------------------------------------------------
-    @Override
-    public void onClick(View v) {
-        if (v == login) {
-            onLoginClicked(v);
-        }
     }
 }
