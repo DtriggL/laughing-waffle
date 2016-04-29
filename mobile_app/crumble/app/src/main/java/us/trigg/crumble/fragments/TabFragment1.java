@@ -1,29 +1,39 @@
 package us.trigg.crumble.fragments;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 
+import us.trigg.crumble.Crumb;
 import us.trigg.crumble.ListViewAdapter;
 import us.trigg.crumble.R;
+import us.trigg.crumble.WebCom;
+import us.trigg.crumble.WebConstants;
+import us.trigg.crumble.interfaces.WebComHandler;
 
-public class TabFragment1 extends Fragment {
+
+
+import static us.trigg.crumble.WebConstants.PAYLOAD_TAG;
+
+public class TabFragment1 extends Fragment implements WebComHandler {
 
     //private SQLiteAdapter mySQLiteAdapter;
-    private ArrayList<HashMap<String, String>> list;
-
-    ListView listContent;
-    Random rand = new Random();
+    private ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String,String>>();
+    private ListView listView;
 
 
     public TabFragment1(){}
@@ -31,57 +41,34 @@ public class TabFragment1 extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.tab_fragment_1, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_pins, container, false);
         //listContent = (ListView) view.findViewById(R.id.list_myPins);
         // return view;
 
-        ListView listView=(ListView)view.findViewById(R.id.list_myPins);
-
-        list=new ArrayList<HashMap<String,String>>();
-
-        HashMap<String,String> temp=new HashMap<String, String>();
-        temp.put("First", "Hotz Hall Scavenger Hunt 1");
-        temp.put("Second", "Feeling hungry? Finding the first clue will be a treat!");
-        temp.put("Third", "5");
-        temp.put("Fourth", "4/25/16");
-        list.add(temp);
-
-        HashMap<String,String> temp2=new HashMap<String, String>();
-        temp2.put("First", "Hotz Hall Scavenger Hunt 2");
-        temp2.put("Second", "The next clue can be found\n in the box making a musical sound.");
-        temp2.put("Third", "5");
-        temp2.put("Fourth", "4/25/16");
-        list.add(temp2);
-
-        HashMap<String,String> temp3=new HashMap<String, String>();
-        temp3.put("First", "Hotz Hall Scavenger Hunt 3");
-        temp3.put("Second", "The more I dry, the wetter I become.\n" +
-                            "Find me and you're almost done!");
-        temp3.put("Third", "5");
-        temp3.put("Fourth", "4/25/16");
-        list.add(temp3);
-
-        HashMap<String,String> temp4=new HashMap<String, String>();
-        temp3.put("First", "The best fishing spot on Beaver Lake");
-        temp3.put("Second", "This was a great spot to find a lot of Striped Bass!\n" +
-                "You can always find a massive school here.");
-        temp3.put("Third", "2");
-        temp3.put("Fourth", "4/10/16");
-        list.add(temp4);
-
-        HashMap<String,String> temp5=new HashMap<String, String>();
-        temp3.put("First", "Biker's Ultimate Challenge Course");
-        temp3.put("Second", "Guaranteed biker's high. Ruts, drop-offs," +
-                "narrow raodways!\n This trail has everything. Start at a\n" +
-                "a beautiful lake and end up at the\n top of a mountian with" +
-                "a fantastic view!");
-        temp3.put("Third", "4.2");
-        temp3.put("Fourth", "3/16/16");
-        list.add(temp5);
-
-        ListViewAdapter adapter=new ListViewAdapter(getActivity(), list);
+        ListViewAdapter adapter = new ListViewAdapter(getActivity(), list);
+        listView = (ListView) view.findViewById(R.id.list_myPins);
         listView.setAdapter(adapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        HashMap<String,String> temp=new HashMap<>();
+        temp.put("First", "Title");
+        temp.put("Second", "Views");
+        //temp.put("Third", "Rating1");
+        temp.put("Fourth", "Rating");
+        list.add(temp);
+
+        SharedPreferences sharedPreferences = getActivity()
+                .getSharedPreferences(getString(R.string.SharedPreferencesKey), Context.MODE_PRIVATE);
+
+        int u_id = sharedPreferences.getInt("user_id", 0);
+
+
+        WebComHandler wcHandler = this;
+        WebCom wc = new WebCom(wcHandler, this.getContext());
+        wc.getOwnedCrumbs(u_id);
+
+        //Log.d("USER_ID", Integer.toString(u_id));
+
+       /* listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
             public void onItemClick(AdapterView<?> parent, final View view, int position, long id)
@@ -91,6 +78,18 @@ public class TabFragment1 extends Fragment {
             }
 
         });
+       */
+
+        Log.d("LIST1", Integer.toString(list.size()));
+
+
+        //ListView listView=(ListView)view.findViewById(R.id.list_myPins);
+
+
+
+        // ListViewAdapter adapter=new ListViewAdapter(getActivity(), list);
+        //listView.setAdapter(adapter);
+
 
         return view;
 
@@ -131,4 +130,128 @@ public class TabFragment1 extends Fragment {
         **/
 
     }
+
+    @Override
+    public void onGetOwnedCrumbs(JSONObject json) {
+        Log.d("Tab", "Check1");
+
+        JSONArray data = null;
+        try {
+            data = json.getJSONArray(PAYLOAD_TAG);
+
+            for (int i = 0; i < data.length(); i++) {
+                JSONObject mJSONCrumb = data.getJSONObject(i);
+                Crumb crumb = new Crumb();
+
+                String title = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_TITLE);
+                String lat = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_LATITUDE);
+                String lng = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_LONGITUDE);
+                int crumb_id = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_CRUMB_ID);
+                //String date = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_CREATION_DATE);
+                //String message = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_MESSAGE);
+                // int creator_id = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_CREATOR_ID);
+                //int ratings = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_RATINGS);
+                int total = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_TOTAL_DISCOVERED);
+                Float rating = Float.parseFloat(mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_RATING));
+
+                if(title != null)
+                    crumb.setTitle(title);
+                /*if(lat != null)
+                    crumb.setLatitude(lat);
+                if(lng != null)
+                    crumb.setLongitude(lng);
+                if(crumb_id >= 0)
+                    crumb.setCrumbID(crumb_id);
+                if(date != null)
+                    crumb.setCreationDate(date);
+                if(message != null)
+                    crumb.setMessage(message);
+                if(creator_id >= 0)
+                    crumb.setCreatorID(creator_id);
+                if(ratings >= 0.0)
+                    crumb.setRatings(ratings);*/
+                if(total >= 0)
+                    crumb.setTotalDiscovered(total);
+                if(rating >= 0.0)
+                    crumb.setRating(rating);
+
+
+                Log.d("LIST2", Integer.toString(list.size()));
+
+                HashMap<String,String> temp2 = new HashMap<>();
+                temp2.put("First", title);
+                temp2.put("Second", Integer.toString(total));
+                temp2.put("Fourth", Float.toString(rating));
+                list.add(temp2);
+
+                ListViewAdapter adapter = new ListViewAdapter(getActivity(), list);
+                listView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
+
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        Log.d("LIST3", Integer.toString(list.size()));
+
+        //list.notify();
+
+
+        String name = json.optString("name");
+        int profileIconId = json.optInt("profileIconId");
+    }
+
+    @Override
+    public void onGetAllCrumbs(JSONObject json) {
+
+    }
+
+    @Override
+    public void onGetFoundCrumbs(JSONObject json) {
+
+    }
+
+    @Override
+    public void onUserLogin(JSONObject json) {
+
+    }
+
+    @Override
+    public void onUserAdd(JSONObject json) {
+
+    }
+
+    @Override
+    public void onGetUserLogbook(JSONObject json) {
+
+    }
+
+    @Override
+    public void onAddLogbookEntry(JSONObject json) {
+
+    }
+
+    @Override
+    public void onFindCrumb(JSONObject json) {
+
+    }
+
+    @Override
+    public void onGetCrumb(JSONObject json) {
+
+    }
+
+    @Override
+    public void onAddCrumb(JSONObject json) {
+
+    }
+
+    @Override
+    public android.support.v4.app.FragmentManager getMyFragmentManager() {
+        return null;
+    }
+
 }

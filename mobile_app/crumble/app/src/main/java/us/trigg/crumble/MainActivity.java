@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final int FAB_GO = 1;
     public static final int FAB_ADD = 0;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-    public static final float DISTANCE_REQUIRED = 20; // Distance in meters
+    public static final float DISTANCE_REQUIRED = 40; // Distance in meters
 
     private ClusterManager<Crumb> mClusterManager;
     private MyClusterRender mClusterRenderer;
@@ -464,7 +464,15 @@ public class MainActivity extends AppCompatActivity implements
                                         String lat = Double.toString(mCurrentLocation.getLatitude());
                                         String lng = Double.toString(mCurrentLocation.getLongitude());
 
-                                        new CreateNewCrumb().execute(stringTitle, stringContent, lat, lng);
+                                        sharedPreferences = getSharedPreferences(getString(R.string.SharedPreferencesKey), Context.MODE_PRIVATE);
+
+                                        int u_id = sharedPreferences.getInt("user_id", 0);
+
+                                        myWebCom.addCrumb(u_id, stringTitle, lat,
+                                                lng, stringContent);
+
+
+                                        //new CreateNewCrumb().execute(stringTitle, stringContent, lat, lng);
                                     } else {
                                         Log.d(TAG, "Location null in FAB onClick");
                                         Toast.makeText(getParent(), "No location determined. Make sure location service is enabled", Toast.LENGTH_LONG).show();
