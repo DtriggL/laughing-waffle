@@ -28,5 +28,4 @@ dependencies {
     compile 'com.android.support:design:23.2.0'
     compile 'com.google.maps.android:android-maps-utils:0.3.+'
     compile 'com.android.support:support-v4:23.2.0'
-    compile 'pl.droidsonroids.gif:android-gif-drawable:1.1.+'
 }

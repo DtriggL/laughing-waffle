@@ -4,13 +4,9 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="tan">#FFFFE3</color>
-    <color name="white">#FFFFFF</color>
-    <color name="route_purple">#CC33FF</color>
-    <color name="green">#008000</color>
-    <color name="aquamrine">#AA93FFE8</color>
-    <color name="blue">#AA3BB9FF</color>
     <color name="colorOrange">#FFA85A</color>
     <color name="colorGreen">#007200</color>
     <color name="colorDarkGreen">#004F00</color>
-    <color name="red">#FF0000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="route_purple">#CC33FF</color>
 </resources>

@@ -13,20 +13,36 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.trigg.crumble.WebConstants.*;
-import static us.trigg.crumble.WebConstants.OnlineUserTableContact.*;
-import static us.trigg.crumble.WebConstants.OnlineLogbookTableContact.*;
-import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.*;
-
 import us.trigg.crumble.fragments.NoConnectionAlertFragment;
-import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
 import us.trigg.crumble.interfaces.WebComHandler;
+
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_CREATOR_ID;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_LATITUDE;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_LONGITUDE;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_MESSAGE;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_TITLE;
+import static us.trigg.crumble.WebConstants.OnlineLogbookTableContact.LOGBOOK_CONTENT;
+import static us.trigg.crumble.WebConstants.OnlineLogbookTableContact.LOGBOOK_USER_ID;
+import static us.trigg.crumble.WebConstants.OnlineUserTableContact.COLUMN_EMAIL;
+import static us.trigg.crumble.WebConstants.OnlineUserTableContact.COLUMN_FIRST_NAME;
+import static us.trigg.crumble.WebConstants.OnlineUserTableContact.COLUMN_LAST_NAME;
+import static us.trigg.crumble.WebConstants.OnlineUserTableContact.COLUMN_USERNAME;
+import static us.trigg.crumble.WebConstants.OnlineUserTableContact.COLUMN_USER_PASSWORD;
+import static us.trigg.crumble.WebConstants.URL_ADD_CRUMB;
+import static us.trigg.crumble.WebConstants.URL_ALL_CRUMBS;
+import static us.trigg.crumble.WebConstants.URL_CRUMB_FIND;
+import static us.trigg.crumble.WebConstants.URL_GET_CRUMB;
+import static us.trigg.crumble.WebConstants.URL_GET_USER_CREATED_CRUMBS;
+import static us.trigg.crumble.WebConstants.URL_GET_USER_FOUND_CRUMBS;
+import static us.trigg.crumble.WebConstants.URL_USER_ADD;
+import static us.trigg.crumble.WebConstants.URL_USER_LOGBOOK;
+import static us.trigg.crumble.WebConstants.URL_USER_LOGBOOK_ADD;
+import static us.trigg.crumble.WebConstants.URL_USER_LOGIN;
 
 /**
  * Created by trigglatour on 4/27/16.
  */
 public class WebCom {
-    public static final String TAG = "WebCom";
     private WebComHandler webComHandler;
     private Context context;
 
@@ -52,6 +68,7 @@ public class WebCom {
     }
 
     public void getFoundCrumbs(int user_id) {
+        Log.d("TAB2", "IN FOUND CRUMBS");
         String user_id_str = Integer.toString(user_id);
         WebRequest request = new WebRequest(URL_GET_USER_FOUND_CRUMBS + user_id_str, "GET", null);
         request.showProgressDialog(true);
@@ -64,7 +81,6 @@ public class WebCom {
         params.add(new BasicNameValuePair(COLUMN_USERNAME, username));
         params.add(new BasicNameValuePair(COLUMN_USER_PASSWORD, password));
 
-        Log.v(TAG, "Password is: " + password);
         WebRequest request = new WebRequest(URL_USER_LOGIN, "POST", params);
         request.showProgressDialog(true);
         request.execute(null, null, null);
@@ -150,7 +166,7 @@ public class WebCom {
 
     //-----------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------
-    private class WebRequest extends AsyncTask<String, String, String> implements MyFragmentDialogInterface {
+    private class WebRequest extends AsyncTask<String, String, String> {
 
         private String url;
         private String method;
@@ -211,8 +227,8 @@ public class WebCom {
             } catch (Exception e) {
                 // There's not an internet connection
                 // Throw up a dialog that lets the user retry
-//                alert = new NoConnectionAlertFragment();
-//                alert.show(webComHandler.getMyFragmentManager(),"Alert Dialog");
+                alert = new NoConnectionAlertFragment();
+                alert.show(webComHandler.getMyFragmentManager(),"Alert Dialog");
 
             }
             return null;
@@ -229,7 +245,6 @@ public class WebCom {
                     /**
                      * Call function in UI thread to update the  map
                      * */
-
                     postResult(mJson, url);
                 }
             }).run();
@@ -244,11 +259,11 @@ public class WebCom {
         // Posts the result to the correct result handler depending on the URL selected.
         //-----------------------------------------------------------------------------------
         protected void postResult(JSONObject json, String url) {
-            if (url.compareTo(URL_GET_USER_CREATED_CRUMBS) == 0) {
+            if (url.compareTo(URL_GET_USER_CREATED_CRUMBS+"1") == 0) {
                 webComHandler.onGetOwnedCrumbs(json);
             } else if (url.compareTo(URL_ALL_CRUMBS) == 0) {
                 webComHandler.onGetAllCrumbs(json);
-            } else if (url.compareTo(URL_GET_USER_FOUND_CRUMBS) == 0) {
+            } else if (url.compareTo(URL_GET_USER_FOUND_CRUMBS+"1") == 0) {
                 webComHandler.onGetFoundCrumbs(json);
             } else if (url.compareTo(URL_USER_LOGIN) == 0) {
                 webComHandler.onUserLogin(json);
@@ -265,16 +280,6 @@ public class WebCom {
             } else if (url.compareTo(URL_ADD_CRUMB) == 0) {
                 webComHandler.onAddCrumb(json);
             }
-        }
-
-        @Override
-        public void doPositiveClick() {
-            //alert.dismiss();
-        }
-
-        @Override
-        public void doNegativeClick() {
-
         }
     }
 }

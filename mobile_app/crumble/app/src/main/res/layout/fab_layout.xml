@@ -15,17 +15,7 @@
         android:clickable="true"
         app:borderWidth="0dp"
         app:elevation="6dp"
+        app:fabSize="mini"
         app:backgroundTint="@color/colorOrange" />
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/stop_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_margin="16dp"
-        android:src="@drawable/stop"
-        android:clickable="true"
-        app:borderWidth="0dp"
-        app:elevation="6dp"
-        app:backgroundTint="@color/red" />
 
 </FrameLayout>

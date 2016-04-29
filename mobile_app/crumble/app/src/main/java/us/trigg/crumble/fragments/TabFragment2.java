@@ -1,55 +1,105 @@
 package us.trigg.crumble.fragments;
 
+import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import java.util.Random;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import us.trigg.crumble.Crumb;
+import us.trigg.crumble.ListViewAdapter;
 import us.trigg.crumble.R;
+import us.trigg.crumble.WebCom;
+import us.trigg.crumble.WebConstants;
+import us.trigg.crumble.interfaces.WebComHandler;
 
-public class TabFragment2 extends Fragment {
+import static us.trigg.crumble.WebConstants.PAYLOAD_TAG;
+
+public class TabFragment2 extends Fragment implements WebComHandler {
 
     //private SQLiteAdapter mySQLiteAdapter;
-    ListView listContent;
-    Random rand = new Random();
+    ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
 
+    ListView listView;
 
-    public TabFragment2(){}
+    public TabFragment2() {
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.tab_fragment_2, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_pins, container, false);
+        //listContent = (ListView) view.findViewById(R.id.list_myPins);
+        // return view;
+
+        ListViewAdapter adapter = new ListViewAdapter(getActivity(), list);
+        listView = (ListView) view.findViewById(R.id.list_myPins);
+        listView.setAdapter(adapter);
+
+        HashMap<String, String> temp = new HashMap<>();
+        temp.put("First", "Title");
+        temp.put("Second", "Views");
+        //temp.put("Third", "Rating1");
+        temp.put("Fourth", "Rating");
+        list.add(temp);
+
+        WebComHandler wcHandler = this;
+        WebCom wc = new WebCom(wcHandler, this.getContext());
+        wc.getFoundCrumbs(1);
+
+       /* listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, final View view, int position, long id)
+            {
+                int pos=position+1;
+                Toast.makeText(getActivity(), Integer.toString(pos)+" Clicked", Toast.LENGTH_SHORT).show();
+            }
+
+        });
+       */
+
+        Log.d("TAB2LIST1", Integer.toString(list.size()));
 
 
-        listContent = (ListView) view.findViewById(R.id.list_myPins);
+        //ListView listView=(ListView)view.findViewById(R.id.list_myPins);
+
+
+        // ListViewAdapter adapter=new ListViewAdapter(getActivity(), list);
+        //listView.setAdapter(adapter);
+
 
         return view;
+
     }
 
+
     @Override
-    public void onActivityCreated(Bundle savedInstanceState){
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         //uncomment when contract class is fixed
-    /*
-        mySQLiteAdapter = new SQLiteAdapter(getActivity());
-        mySQLiteAdapter.openToWrite();
-        mySQLiteAdapter.deleteAll();
-
-        for(int i = 0; i < rand.nextInt(50)+10; ++i){
-            mySQLiteAdapter.insert(new Integer(rand.nextInt(1000)).toString());
-        }
+        /**
+         mySQLiteAdapter = new SQLiteAdapter(getActivity());
+         mySQLiteAdapter.openToWrite();
+         mySQLiteAdapter.deleteAll();
 
 
-        mySQLiteAdapter.close();
+         mySQLiteAdapter.close();
 
-
-        Open the same SQLite database
-        and read all it's content.
-
+         /*
+         *  Open the same SQLite database
+         *  and read all it's content.
+         *//*
         mySQLiteAdapter = new SQLiteAdapter(getActivity());
         mySQLiteAdapter.openToRead();
 
@@ -65,6 +115,130 @@ public class TabFragment2 extends Fragment {
         listContent.setAdapter(cursorAdapter);
 
         mySQLiteAdapter.close();
-        */
+        **/
+
+    }
+
+    @Override
+    public void onGetOwnedCrumbs(JSONObject json) {
+
+    }
+
+    @Override
+    public void onGetAllCrumbs(JSONObject json) {
+
+    }
+
+    @Override
+    public void onGetFoundCrumbs(JSONObject json) {
+        Log.d("Tab2", "Check1");
+
+        JSONArray data = null;
+        try {
+            data = json.getJSONArray(PAYLOAD_TAG);
+
+            for (int i = 0; i < data.length(); i++) {
+                JSONObject mJSONCrumb = data.getJSONObject(i);
+                Crumb crumb = new Crumb();
+
+                String title = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_TITLE);
+                String lat = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_LATITUDE);
+                String lng = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_LONGITUDE);
+                int crumb_id = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_CRUMB_ID);
+                //String date = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_CREATION_DATE);
+                //String message = mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_MESSAGE);
+                // int creator_id = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_CREATOR_ID);
+                //int ratings = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_RATINGS);
+                int total = mJSONCrumb.getInt(WebConstants.OnlineCrumbTableContact.COLUMN_TOTAL_DISCOVERED);
+                Float rating = Float.parseFloat(mJSONCrumb.getString(WebConstants.OnlineCrumbTableContact.COLUMN_RATING));
+
+                if (title != null)
+                    crumb.setTitle(title);
+                if (lat != null)
+                    crumb.setLatitude(lat);
+                if (lng != null)
+                    crumb.setLongitude(lng);
+                if (crumb_id >= 0)
+                    crumb.setCrumbID(crumb_id);
+                //if(date != null)
+                //    crumb.setCreationDate(date);
+                //if(message != null)
+                //    crumb.setMessage(message);
+                //if(creator_id >= 0)
+                //    crumb.setCreatorID(creator_id);
+                //if(ratings >= 0.0)
+                //    crumb.setRatings(ratings);
+                if (total >= 0)
+                    crumb.setTotalDiscovered(total);
+                if (rating >= 0.0)
+                    crumb.setRating(rating);
+
+
+                Log.d("LIST6", Integer.toString(list.size()));
+
+                HashMap<String, String> temp2 = new HashMap<>();
+                temp2.put("First", title);
+                temp2.put("Second", Integer.toString(total));
+                temp2.put("Fourth", Float.toString(rating));
+                list.add(temp2);
+
+                ListViewAdapter adapter = new ListViewAdapter(getActivity(), list);
+                listView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
+
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        Log.d("LIST3", Integer.toString(list.size()));
+
+        //list.notify();
+
+
+        String name = json.optString("name");
+        int profileIconId = json.optInt("profileIconId");
+    }
+
+    @Override
+    public void onUserLogin(JSONObject json) {
+
+    }
+
+    @Override
+    public void onUserAdd(JSONObject json) {
+
+    }
+
+    @Override
+    public void onGetUserLogbook(JSONObject json) {
+
+    }
+
+    @Override
+    public void onAddLogbookEntry(JSONObject json) {
+
+    }
+
+    @Override
+    public void onFindCrumb(JSONObject json) {
+
+    }
+
+    @Override
+    public void onGetCrumb(JSONObject json) {
+
+    }
+
+    @Override
+    public void onAddCrumb(JSONObject json) {
+
+    }
+
+    @Override
+    public FragmentManager getMyFragmentManager() {
+        return null;
     }
 }

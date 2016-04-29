@@ -4,26 +4,19 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/name"
+        android:id="@+id/crumb_title"
         android:layout_height="wrap_content"
         android:layout_width="0dp"
-        android:layout_weight="1"
-        android:textStyle="bold" />
+        android:layout_weight="3" />
 
     <TextView
-        android:id="@+id/gender"
+        android:id="@+id/crumb_message"
         android:layout_height="wrap_content"
         android:layout_width="0dp"
         android:layout_weight="1" />
 
     <TextView
-        android:id="@+id/age"
-        android:layout_height="wrap_content"
-        android:layout_width="0dp"
-        android:layout_weight="0.5" />
-
-    <TextView
-        android:id="@+id/status"
+        android:id="@+id/crumb_rating"
         android:layout_height="wrap_content"
         android:layout_width="0dp"
         android:layout_weight="1" />

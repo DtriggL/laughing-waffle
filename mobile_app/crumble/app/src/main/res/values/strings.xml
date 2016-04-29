@@ -8,18 +8,12 @@
     <string name="action_settings">Settings (not implemented)</string>
     <string name="login_settings">Login</string>
 
-    <string name="title_activity_login">One Account.\nAll of Crumble.</string>
-    <string name="login">Login</string>
-    <string name="login_signup">Sign Up</string>
+    <string name="title_activity_login">Login</string>
     <string name="username_hint">Username</string>
     <string name="password_hint">Password</string>
 
     <string name="title_activity_explore">Map</string>
     <string name="title_activity_main">MainActivity</string>
-
-    <string name="pin_content_done">Done</string>
-    <string name="default_pin_title">Crumb Title...</string>
-    <string name="default_pin_content">Crumb Content...</string>
 
     <string name="logbook">Logbook</string>
     <string name="navigationmenu_title">Menu</string>
@@ -30,22 +24,13 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
-    <!-- Dialog Strings -->
     <string name="cancel">Cancel</string>
+
     <string name="no_connection">No Internet Connection</string>
-    <string name="login_successful">Login Successful</string>
-    <string name="login_unsuccessful">Login Unsuccessful</string>
-    <string name="ok">Okay</string>
 
     <!-- Strings to be used for the map HUD -->
     <string name="heading">Heading</string>
     <string name="altitude">Altitude (MSL)</string>
-    <string name="distance">Distance (Meters)</string>
-    <string name="na">N/A</string>
-
-    <!-- Shared Preferences Key and Fields-->
-    <string name="SharedPreferencesKey">us.trigg.crumble.sharedPreferences</string>
-    <string name="stored_user_id">user_id</string>
-
+    <string name="distance">Distance</string>
 
 </resources>

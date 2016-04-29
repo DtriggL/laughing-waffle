@@ -1,6 +1,9 @@
 package us.trigg.crumble;
 
 import android.app.Activity;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +22,7 @@ public class ListViewAdapter extends BaseAdapter {
     Activity activity;
     TextView txtFirst;
     TextView txtSecond;
-    TextView txtThird;
+    //TextView txtThird;
     TextView txtFourth;
 
     public ListViewAdapter(Activity activity, ArrayList<HashMap<String, String>> list){
@@ -49,21 +52,35 @@ public class ListViewAdapter extends BaseAdapter {
 
         if(convertView == null){
 
-            convertView=inflater.inflate(R.layout.pins_column_row, null);
+            convertView=inflater.inflate(R.layout.pins_column_row, parent, false);
 
-            txtFirst=(TextView) convertView.findViewById(R.id.name);
-            txtSecond=(TextView) convertView.findViewById(R.id.gender);
-            txtThird=(TextView) convertView.findViewById(R.id.age);
-            txtFourth=(TextView) convertView.findViewById(R.id.status);
+            txtFirst=(TextView) convertView.findViewById(R.id.crumb_title);
+            txtSecond=(TextView) convertView.findViewById(R.id.crumb_message);
+            //txtThird=(TextView) convertView.findViewById(R.id.crumb_date);
+            txtFourth=(TextView) convertView.findViewById(R.id.crumb_rating);
 
         }
 
         HashMap<String, String> map=list.get(position);
-        txtFirst.setText(map.get("First"));
-        txtSecond.setText(map.get("Second"));
-        txtThird.setText(map.get("Third"));
-        txtFourth.setText(map.get("Fourth"));
+        if(position==0){
+            SpannableString spanString1 = new SpannableString(map.get("First"));
+            spanString1.setSpan(new StyleSpan(Typeface.BOLD), 0, spanString1.length(), 0);
+            txtFirst.setText(spanString1);
 
+            SpannableString spanString2 = new SpannableString(map.get("Second"));
+            spanString2.setSpan(new StyleSpan(Typeface.BOLD), 0, spanString2.length(), 0);
+            txtSecond.setText(spanString2);
+
+            SpannableString spanString4 = new SpannableString(map.get("Fourth"));
+            spanString4.setSpan(new StyleSpan(Typeface.BOLD), 0, spanString4.length(), 0);
+            txtFourth.setText(spanString4);
+        }
+        else {
+            txtFirst.setText(map.get("First"));
+            txtSecond.setText(map.get("Second"));
+            //txtThird.setText(map.get("Third"));
+            txtFourth.setText(map.get("Fourth"));
+        }
         return convertView;
     }
 }
