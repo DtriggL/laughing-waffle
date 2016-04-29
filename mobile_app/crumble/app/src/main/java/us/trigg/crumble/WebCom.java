@@ -268,11 +268,11 @@ public class WebCom {
             String url_get_crumbParsed = URL_GET_CRUMB.substring(0, URL_GET_CRUMB.length() - 2);
             Log.d(TAG, "post Result in here Manoj" + url_user_created_crumbs + " " + url_get_crumbParsed);
 
-            if (url_user_created_crumbs.compareTo(URL_GET_USER_CREATED_CRUMBS) == 0) {
+            if (url.contains(URL_GET_USER_CREATED_CRUMBS)) {
                 webComHandler.onGetOwnedCrumbs(json);
             } else if (url.compareTo(URL_ALL_CRUMBS) == 0) {
                 webComHandler.onGetAllCrumbs(json);
-            }  if (url.compareTo(URL_GET_USER_FOUND_CRUMBS) == 1) {
+            } else if (url.contains(URL_GET_USER_FOUND_CRUMBS)) {
                 webComHandler.onGetFoundCrumbs(json);
             } else if (url.compareTo(URL_USER_LOGIN) == 0) {
                 webComHandler.onUserLogin(json);
