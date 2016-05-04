@@ -12,9 +12,6 @@ import android.view.ViewGroup;
 import us.trigg.crumble.NewPagerAdapter;
 import us.trigg.crumble.R;
 
-/**
- * Created by Josh on 4/25/2016.
- */
 public class PinsFragment extends Fragment {
 
     @Nullable
