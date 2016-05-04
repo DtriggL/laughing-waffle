@@ -189,4 +189,9 @@ public class LoginFragment extends Fragment implements WebComHandler {
     public android.support.v4.app.FragmentManager getMyFragmentManager() {
        return getFragmentManager();
     }
+
+    @Override
+    public void onRateCrumb(JSONObject json) {
+
+    }
 }

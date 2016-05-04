@@ -252,4 +252,9 @@ public class TabFragment2 extends Fragment implements WebComHandler {
         return null;
     }
 
+    @Override
+    public void onRateCrumb(JSONObject json) {
+
+    }
+
 }

@@ -15,4 +15,7 @@
     <color name="darkerTeal">#00FFCC</color>
     <color name="red">#FF0000</color>
     <color name="transparentColor">#80000000</color>
+    <color name="darkgray">#555555</color>
+    <color name="duskYellow">#E9B900</color>
+    <color name="lightgray">#AAAAAA</color>
 </resources>

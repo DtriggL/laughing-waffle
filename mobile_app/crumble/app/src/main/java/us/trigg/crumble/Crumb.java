@@ -148,7 +148,7 @@ public class Crumb implements ClusterItem {
     //-----------------------------------------------------------------
     // Misc. Public Methods
     //-----------------------------------------------------------------
-    public void addRating(int newRating) {
+    public void addLocalRating(float newRating) {
         // Compute the new overall rating
         rating = ((ratings * rating) + newRating)/(ratings + 1);
         // Increment the total number of ratings

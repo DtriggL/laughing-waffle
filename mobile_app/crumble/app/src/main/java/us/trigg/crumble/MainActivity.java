@@ -21,12 +21,14 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -71,6 +73,7 @@ import us.trigg.crumble.interfaces.WebComHandler;
 
 import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact;
 import static us.trigg.crumble.WebConstants.PAYLOAD_TAG;
+import static us.trigg.crumble.WebConstants.STATUS_OK;
 import static us.trigg.crumble.WebConstants.STATUS_TAG;
 
 // TODO:
@@ -401,6 +404,18 @@ public class MainActivity extends AppCompatActivity implements
         return getSupportFragmentManager();
     }
 
+    @Override
+    public void onRateCrumb(JSONObject json) {
+        try {
+            // If the crumb was found by the server
+            if (json.getString(STATUS_TAG).compareTo(STATUS_OK) == 0) {
+                Log.v(TAG, "New rating successfully stored on server.");
+            }
+        } catch (JSONException e) {
+            Log.v(TAG, "Unable to store new rating on server.");
+        }
+    }
+
     //-----------------------------------------------------------------------------------
     // Floating Action Button Visibility
     //-----------------------------------------------------------------------------------
@@ -725,6 +740,8 @@ public class MainActivity extends AppCompatActivity implements
         toCrumb = null;
         hideHUD();
         routeLine.remove();
+        stop_fab.hide();
+        isDownloaded = false;
     }
 
     //-----------------------------------------------------------------------------------
@@ -901,8 +918,8 @@ public class MainActivity extends AppCompatActivity implements
 
                 // Set the content of the views
                 title.setText(crumb.getTitle());
-                bites.setText(Integer.toString(crumb.getTotalDiscovered()));
-                rating.setText(Float.toString(crumb.getRating()));
+                bites.setText(String.format(Locale.ENGLISH, "%d", crumb.getTotalDiscovered()));
+                rating.setText(String.format(Locale.ENGLISH, "%.1f", crumb.getRating()));
 
                 // DEBUG
                 Log.v(TAG, "Just showed infoWindow for crumb " + crumb.getTitle());
@@ -943,24 +960,39 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(TAG,"found crumb, in check found" + alert1Showing + isDownloaded);
             if ((getDistanceToCrumb(mCurrentLocation, toCrumb) < DISTANCE_REQUIRED) && alert1Showing == false){
                 Log.d(TAG,"opening the alert, found crumb");
-                ImageView image = new ImageView(MainActivity.this);
-                image.setImageResource(R.drawable.crumb_pic);
+
+                // Inflate the view to show the user the content of the crumb
+                LayoutInflater inflater = (LayoutInflater)getApplicationContext().getSystemService
+                        (Context.LAYOUT_INFLATER_SERVICE);
+                final View crumbView = inflater.inflate(R.layout.fragment_crumb_content, null);
+
+                // Set all of the fields within the view
+                // Get the text views
+                TextView message = (TextView) crumbView.findViewById(R.id.pin_content);
+                TextView title = (TextView) crumbView.findViewById(R.id.pin_title);
+                // Get the rating bar
+                final RatingBar ratingBar = (RatingBar) crumbView.findViewById(R.id.crumb_rating_bar);
+
+                // Set the content
+                message.setText(toCrumb.getMessage());
+                title.setText(toCrumb.getTitle());
+
+
                 final AlertDialog.Builder alert1 = new AlertDialog.Builder(MainActivity.this);
-                alert1.setTitle(toCrumb.getTitle());
-                alert1.setMessage("Message: " + toCrumb.getMessage() + "\nPosition:\n\t\t\tLatitude: " + toCrumb.getPosition().latitude +
-                                    "\n\t\t\tLongitude: " + toCrumb.getPosition().longitude +
-                                    "\nDiscovered by: " + toCrumb.getTotalDiscovered() + "\nRating: " + toCrumb.getRating());
-                alert1.setIcon(getResources().getDrawable(R.drawable.cookie_icon));
+                alert1.setView(crumbView);
+
                 alert1.setNegativeButton("Back to adventure", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         myWebCom.findCrumb(userId, toCrumb.getCrumb_id());
+                        // Get the rating from the rating bar
+                        Float rating = ratingBar.getRating();
+                        // Send the rating to the server
+                        myWebCom.rateCrumb(toCrumb.getCrumb_id(), rating);
+                        toCrumb.addLocalRating(rating);
                         alert1Showing = false;
                         endRoute();
-                        isDownloaded=false;
-                        stop_fab.hide();
                     }
                 });
-                //alert1.setView(image);
                 alert1.show();
                 alert1Showing = true;
             }

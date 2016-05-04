@@ -28,6 +28,8 @@ public class WebConstants {
 
     public static final String URL_USER_ADD = SERVER_ADDR + "user/add";
 
+    public static final String URL_CRUMB_RATE = SERVER_ADDR + "crumb/rate";
+
     // JSON Result Tags
     public static final String STATUS_TAG = "status";
     public static final String PAYLOAD_TAG = "data";
@@ -35,6 +37,7 @@ public class WebConstants {
     // JSON Status Field Values
     public static final String STATUS_FOUND = "FOUND";
     public static final String STATUS_NOT_FOUND = "NOT-FOUND";
+    public static final String STATUS_OK = "OK";
 
     public static class OnlineCrumbTableContact {
         private OnlineCrumbTableContact() {}

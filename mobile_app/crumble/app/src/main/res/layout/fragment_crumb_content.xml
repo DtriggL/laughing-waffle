@@ -3,40 +3,61 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/side_nav_bar"
     >
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_gravity="center">
 
-        <TextView
-            android:id="@+id/pin_title"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/default_pin_title"
-            android:textSize="30dp"
-            android:layout_gravity="center"
-            android:gravity="center"/>
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_margin="5dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/pin1"/>
+            <TextView
+                android:id="@+id/pin_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/default_pin_title"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:gravity="left"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimaryDark"
+                android:padding="@dimen/crumb_long_view_padding"/>
+        </LinearLayout>
+
+        <View style="@style/Divider" />
 
         <TextView
             android:id="@+id/pin_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/default_pin_content"
-            android:textSize="30dp"
+            android:textSize="12sp"
             android:layout_gravity="center"
-            android:gravity="center"/>
+            android:gravity="left"
+            android:layout_marginBottom="20dp"
+            android:textColor="@color/darkgray"
+            android:padding="@dimen/crumb_long_view_padding"/>
 
-        <Button
-            android:id="@+id/done_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/pin_content_done"
-            android:onClick="endFragment"
-            android:layout_gravity="right"/>
+        <View style="@style/Divider" />
+
+        <RatingBar
+            android:id="@+id/crumb_rating_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:numStars="5"
+            android:theme="@style/RatingBar"
+            android:layout_gravity="center"/>
+
 
     </LinearLayout>
 
