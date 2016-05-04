@@ -535,11 +535,6 @@ public class MainActivity extends AppCompatActivity implements
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -598,7 +593,7 @@ public class MainActivity extends AppCompatActivity implements
         }
         else if (id == R.id.nav_login) {
             hideFloatingActionButton();
-            toolbar.setBackground(getResources().getDrawable(R.drawable.stars));
+            toolbar.setBackground(getResources().getDrawable(R.color.transparentColor));
             fm.beginTransaction().replace(R.id.frag_manager_frame, new LoginFragment()).commit();
         }
         else if (id == R.id.nav_share) { }
