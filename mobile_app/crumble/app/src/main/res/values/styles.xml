@@ -42,6 +42,7 @@
     <style name="RatingBar" parent="Theme.AppCompat">
         <item name="colorControlNormal">@color/duskYellow</item>
         <item name="colorControlActivated">@color/lightgray</item>
+        <item name="android:numStars">5</item>
     </style>
 
 </resources>

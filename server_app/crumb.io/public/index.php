@@ -148,7 +148,7 @@ $app->post('/api/crumb/rate', function () use ($app) {
         // Add one to the number of ratings
         $result->ratings = $result->ratings + 1;
         // Compute the new rating
-        $new_rating = (floatval($crumb->rating) + floatval($result->rating)) / floatval($result->ratings);
+        $new_rating = ((floatval($result->rating) * (floatval($result->ratings) - 1)) + floatval($crumb->rating)) / floatval($result->ratings);
         $phql = "UPDATE Crumb SET rating = :new_rating:, ratings = :new_ratings: WHERE crumb_id = :id:";
         $status = $app->modelsManager->executeQuery($phql, array(
             'id' => $crumb->crumb_id,

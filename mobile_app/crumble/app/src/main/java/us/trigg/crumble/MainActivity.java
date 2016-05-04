@@ -923,8 +923,8 @@ public class MainActivity extends AppCompatActivity implements
 
                 // Set the content of the views
                 title.setText(crumb.getTitle());
-                bites.setText(Integer.toString(crumb.getTotalDiscovered()));
-                rating.setText(Float.toString(crumb.getRating()));
+                bites.setText(String.format(Locale.ENGLISH, "%d", crumb.getTotalDiscovered()));
+                rating.setText(String.format(Locale.ENGLISH, "%.1f", crumb.getRating()));
 
                 // DEBUG
                 Log.v(TAG, "Just showed infoWindow for crumb " + crumb.getTitle());
@@ -993,7 +993,7 @@ public class MainActivity extends AppCompatActivity implements
                         Float rating = ratingBar.getRating();
                         // Send the rating to the server
                         myWebCom.rateCrumb(toCrumb.getCrumb_id(), rating);
-
+                        toCrumb.addLocalRating(rating);
                         alert1Showing = false;
                         endRoute();
                     }

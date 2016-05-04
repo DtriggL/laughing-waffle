@@ -6,7 +6,7 @@
     >
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_gravity="center">
@@ -52,10 +52,11 @@
 
         <RatingBar
             android:id="@+id/crumb_rating_bar"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:numStars="5"
-            android:theme="@style/RatingBar"/>
+            android:theme="@style/RatingBar"
+            android:layout_gravity="center"/>
 
 
     </LinearLayout>
