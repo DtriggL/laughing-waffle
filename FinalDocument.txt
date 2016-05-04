@@ -6,3 +6,4 @@ No special requirements are needed to build this project.
 
 Team Members:
 Daniel Trigg La Tour - 010626284
+Joshua Cody Lewis - 010567359

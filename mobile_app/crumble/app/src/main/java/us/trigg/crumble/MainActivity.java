@@ -26,7 +26,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -61,7 +60,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -490,7 +491,9 @@ public class MainActivity extends AppCompatActivity implements
                                                 lng, stringContent);
                                         Log.d(TAG, "the message in crumb " + stringContent);
 
-                                        //new CreateNewCrumb().execute(stringTitle, stringContent, lat, lng);
+                                        //add logbook entry for crumb creation
+                                        Date date = new Date();
+                                        myWebCom.addLogbookEntry(userId,"Crumb '"+ stringTitle + "' added on " + DateFormat.getDateInstance().format(date));
 
                                         Intent i = new Intent(getApplicationContext(), MainActivity.class);
                                         startActivity(i);
@@ -1000,6 +1003,10 @@ public class MainActivity extends AppCompatActivity implements
                 });
                 alert1.show();
                 alert1Showing = true;
+
+                //adding discovery to logbook
+                Date date = new Date();
+                myWebCom.addLogbookEntry(userId,"Crumb '"+ toCrumb.getTitle() + "' discovered on " + DateFormat.getDateInstance().format(date));
             }
         }
         private void drawRoute() {

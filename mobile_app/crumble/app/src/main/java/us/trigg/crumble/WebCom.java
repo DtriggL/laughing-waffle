@@ -296,7 +296,7 @@ public class WebCom {
                 webComHandler.onUserLogin(json);
             } else if (url.compareTo(URL_USER_ADD) == 0) {
                 webComHandler.onUserAdd(json);
-            } else if (url.compareTo(URL_USER_LOGBOOK) == 0) {
+            } else if (url.contains(URL_USER_LOGBOOK)) {
                 webComHandler.onGetUserLogbook(json);
             } else if (url.compareTo(URL_USER_LOGBOOK_ADD) == 0) {
                 webComHandler.onAddLogbookEntry(json);
