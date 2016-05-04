@@ -99,6 +99,102 @@ $app->post('/api/crumb/add', function () use ($app) {
     return $response;
 });
 
+
+//-------------------------------------------------------------------------------
+// Function Name: addRating
+// Description: Add a rating to a crumb based on crumb_id
+// URL: http://uaf132701.ddns.uark.edu/api/crumb/rate
+// Method: POST
+// Payload: JSON Crumb Object: Fields are:
+//    1. crumb_id
+//    2. rating
+//
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”OK”,
+//        }
+//    if not success:
+//        {
+//         “status”:”ERROR”
+//         “data”:{errors}
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 201 (Created)
+//  User Not Found: 409 (Conflict)
+//   
+//-------------------------------------------------------------------------------
+$app->post('/api/crumb/rate', function () use ($app) {
+    // Create a response
+    $response = new Response();
+    $valid_response = true;
+    $result_crumb = null;
+    
+    // Get the raw JSON content
+    $crumb->crumb_id = $app->request->getPost("crumb_id");
+    $crumb->rating = $app->request->getPost("rating");
+    
+    $phql = "SELECT * FROM Crumb WHERE crumb_id = :id:";
+    $status = $app->modelsManager->executeQuery($phql, array(
+        'id' => $crumb->crumb_id,
+    ));
+    
+    if (status == false) {
+        $valid_response = false;
+    } 
+    else {
+        $result = $status->getFirst();
+        // Add one to the number of ratings
+        $result->ratings = $result->ratings + 1;
+        // Compute the new rating
+        $new_rating = (floatval($crumb->rating) + floatval($result->rating)) / floatval($result->ratings);
+        $phql = "UPDATE Crumb SET rating = :new_rating:, ratings = :new_ratings: WHERE crumb_id = :id:";
+        $status = $app->modelsManager->executeQuery($phql, array(
+            'id' => $crumb->crumb_id,
+            'new_rating' => $new_rating,
+            'new_ratings' => $result->ratings // Has already been incremented
+        ));
+        if ($status->success() == true) {
+            $valid_response == true;
+            $result_crumb = $status->getModel();
+        } else {
+            $valid_response == false;
+        }
+    }
+    
+    if ($valid_response == true) {
+        // Change the HTTP status
+        $response->setStatusCode(201, "Created");
+
+        $response->setJsonContent(
+            array(
+                'status' => 'OK',
+            )
+        );
+    } else {
+       // Change the HTTP status
+        $response->setStatusCode(409, "Conflict");
+
+        // Send errors to the client
+        $errors = array();
+        foreach ($status->getMessages() as $message) {
+            $errors[] = $message->getMessage();
+        }
+
+        $response->setJsonContent(
+            array(
+                'status'   => 'ERROR',
+                'messages' => $errors
+            )
+        ); 
+    }
+
+    return $response;
+});
+
+
+
 //-------------------------------------------------------------------------------
 // Function Name: getCrumbContent
 // Description: Get the content of a single Crumb based on a note_id

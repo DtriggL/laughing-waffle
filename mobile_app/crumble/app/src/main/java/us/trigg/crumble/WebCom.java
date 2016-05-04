@@ -18,9 +18,11 @@ import us.trigg.crumble.interfaces.MyFragmentDialogInterface;
 import us.trigg.crumble.interfaces.WebComHandler;
 
 import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_CREATOR_ID;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_CRUMB_ID;
 import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_LATITUDE;
 import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_LONGITUDE;
 import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_MESSAGE;
+import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_RATING;
 import static us.trigg.crumble.WebConstants.OnlineCrumbTableContact.COLUMN_TITLE;
 import static us.trigg.crumble.WebConstants.OnlineLogbookTableContact.LOGBOOK_CONTENT;
 import static us.trigg.crumble.WebConstants.OnlineLogbookTableContact.LOGBOOK_USER_ID;
@@ -32,6 +34,7 @@ import static us.trigg.crumble.WebConstants.OnlineUserTableContact.COLUMN_USER_P
 import static us.trigg.crumble.WebConstants.URL_ADD_CRUMB;
 import static us.trigg.crumble.WebConstants.URL_ALL_CRUMBS;
 import static us.trigg.crumble.WebConstants.URL_CRUMB_FIND;
+import static us.trigg.crumble.WebConstants.URL_CRUMB_RATE;
 import static us.trigg.crumble.WebConstants.URL_GET_CRUMB;
 import static us.trigg.crumble.WebConstants.URL_GET_USER_CREATED_CRUMBS;
 import static us.trigg.crumble.WebConstants.URL_GET_USER_FOUND_CRUMBS;
@@ -138,7 +141,7 @@ public class WebCom {
         WebRequest request = new WebRequest(url, "GET", null);
         request.showProgressDialog(false);
         request.execute(null, null, null);
-        // Result posted to parent with onGetOwnedCrumb from the AsyncTask
+        // Result posted to parent
     }
 
     public void getCrumb(int crumb_id) {
@@ -164,7 +167,20 @@ public class WebCom {
         WebRequest request = new WebRequest(URL_ADD_CRUMB, "POST", params);
         request.showProgressDialog(false);
         request.execute(null, null, null);
-        // Result posted to parent with onGetOwnedCrumb from the AsyncTask
+        // Result posted to parent
+    }
+
+    public void rateCrumb(int crumb_id, float rating) {
+        String crumb_id_str = Integer.toString(crumb_id);
+        String rating_str = Float.toString(rating);
+        List <NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair(COLUMN_RATING, rating_str));
+        params.add(new BasicNameValuePair(COLUMN_CRUMB_ID, crumb_id_str));
+
+        WebRequest request = new WebRequest(URL_CRUMB_RATE, "POST", params);
+        request.showProgressDialog(false);
+        request.execute(null, null, null);
+        // Result posted to parent
     }
 
 
@@ -270,6 +286,8 @@ public class WebCom {
 
             if (url.contains(URL_GET_USER_CREATED_CRUMBS)) {
                 webComHandler.onGetOwnedCrumbs(json);
+            } else if (url.contains(URL_CRUMB_RATE)) {
+                webComHandler.onRateCrumb(json);
             } else if (url.compareTo(URL_ALL_CRUMBS) == 0) {
                 webComHandler.onGetAllCrumbs(json);
             } else if (url.contains(URL_GET_USER_FOUND_CRUMBS)) {

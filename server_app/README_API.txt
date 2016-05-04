@@ -225,4 +225,28 @@ Crumble-api
 //   
 //-------------------------------------------------------------------------------
 
-
+//-------------------------------------------------------------------------------
+// Function Name: addRating
+// Description: Add a rating to a crumb based on crumb_id
+// URL: http://uaf132701.ddns.uark.edu/api/crumb/rate
+// Method: POST
+// Payload: JSON Crumb Object: Fields are:
+//    1. crumb_id
+//    2. rating
+//
+// Returns: JSON Object:
+//    if success:
+//        {
+//         “status”:”OK”,
+//        }
+//    if not success:
+//        {
+//         “status”:”ERROR”
+//         “data”:{errors}
+//        }
+// 
+// HTTP Status Codes:
+//  Success: 201 (Created)
+//  User Not Found: 409 (Conflict)
+//   
+//-------------------------------------------------------------------------------

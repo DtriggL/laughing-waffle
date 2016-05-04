@@ -7,4 +7,5 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="crumb_short_view_padding">10dp</dimen>
+    <dimen name="crumb_long_view_padding">10dp</dimen>
 </resources>
