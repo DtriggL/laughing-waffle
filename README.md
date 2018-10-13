@@ -6,6 +6,7 @@ Build Instructions:
 - Using jdk 8
 
 ![Crumble Logo](Seeram_Crumble.png)
+
 Drop a crumb (message) at any location for others to find or go on an adventure searching after other users' crumbs. Every crumb is ranked by number of users and user ratings between 1 and 5 stars. 
 
 Team Members:
